@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme -->
+    <style name="Theme.ArtsyMobileApp" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- Splash screen theme -->
+    <style name="Theme.ArtsyMobileApp.Splash" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+    </style>
+</resources>
