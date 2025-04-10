@@ -12,19 +12,31 @@ import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.json.Json
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.serialization.Serializable
 
-// Data class to hold the search results response
-data class SearchResponse(val results: List<String>)
+@Serializable
+data class SearchResponse(
+    val statusCode: Int,
+    val data: List<Artist>,
+    val message: String,
+    val success: Boolean
+)
+
+@Serializable
+data class Artist(
+    val title: String,
+    val id: String,
+    val thumbnail: String? = null
+)
 
 sealed class SearchState {
     object Loading : SearchState()
-    data class Success(val results: List<String>) : SearchState()
+    data class Success(val results: List<Artist>) : SearchState()
     data class Error(val message: String) : SearchState()
 }
 
 class SearchViewModel : ViewModel() {
     var searchState by mutableStateOf<SearchState>(SearchState.Loading)
-//    var searchResults = mutableStateOf<List<String>>(emptyList())
     var searchQuery by mutableStateOf("")
 
     private val client = HttpClient(Android){
@@ -33,38 +45,47 @@ class SearchViewModel : ViewModel() {
         }
     }
 
-    fun search(query: String) {
-        if (query.length >= 3) {
-            searchState = SearchState.Loading
-            searchQuery = query
-
+    fun onSearchQueryChange(newQuery: String) {
+        searchQuery = newQuery
+        if (newQuery.length >= 3) {
             viewModelScope.launch {
-                val results = fetchSearchResultsFromAPI(query)
-                searchState =  if(results.isNotEmpty()){
-                    SearchState.Success(results)
-                }else{
-                    SearchState.Error("No results found")
-                }
+                performSearch(newQuery)
             }
         } else {
-            searchState =  SearchState.Error("Query must be 3 characters")
+            searchState = SearchState.Error("Type at least 3 characters")
         }
     }
 
-    private suspend fun fetchSearchResultsFromAPI(query: String): List<String> {
+    private suspend fun performSearch(query: String) {
+        searchState = SearchState.Loading
+        Log.d("SearchViewModel", "Searching for: $query")
+
+        val results = fetchSearchResultsFromAPI(query)
+
+        searchState = if (results.isNotEmpty()) {
+            Log.d("SearchViewModel", "Search successful with ${results.size} results")
+            SearchState.Success(results)
+        } else {
+            Log.d("SearchViewModel", "No results found for: $query")
+            SearchState.Error("No results found")
+        }
+    }
+
+    private suspend fun fetchSearchResultsFromAPI(query: String): List<Artist> {
         val url = "https://artsy-shrey-3.wl.r.appspot.com/api/search?q=$query&size=10&type=artist"
         return try {
             val response: String = client.get(url).bodyAsText()
-            val searchResponse = Json.decodeFromString<SearchResponse>(response)
-            searchResponse.results
+            Log.i("SearchAPI", "Raw JSON: $response")
+
+            val searchResponse = Json {
+                ignoreUnknownKeys = true
+            }.decodeFromString<SearchResponse>(response)
+
+            Log.d("SearchAPI", "Parsed Artists: ${searchResponse.data}")
+            searchResponse.data
         } catch (e: Exception) {
             Log.e("SearchError", "Error fetching search results: ${e.message}")
             emptyList()
         }
     }
-
-//    override fun Oncleared(){
-//        super.onCleared()
-//        client.close()
-//    }
 }
