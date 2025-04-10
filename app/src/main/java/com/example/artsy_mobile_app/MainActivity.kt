@@ -7,6 +7,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 
+import androidx.navigation.compose.*
+import androidx.navigation.NavHostController
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -57,30 +60,48 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
-
-            var showSearch by remember { mutableStateOf(false) }
-            var searchQuery by remember { mutableStateOf("") }
-
             ArtsyMobileAppTheme {
-                Scaffold(
-                    topBar = { AppBar(
-                        onSearchClick = { showSearch = !showSearch },
-                        showSearch = showSearch,
-                        searchQuery = searchQuery,
-                        onSearchQueryChange = { searchQuery = it },
-                        onCloseSearch = { showSearch = false }
-                    ) },
-
-                    content = { innerPadding ->
-                        Column(modifier = Modifier.padding(innerPadding)) {
-                                MainContent()
-                        }
-                    },
-                )
+                val navController = rememberNavController()
+                NavHost(navController = navController, startDestination = "home") {
+                    composable("home") {
+                        HomeScreen(navController)
+                    }
+                    composable("login") {
+                        LoginScreen(navController)
+                    }
+                    composable ("register") {
+                        RegisterScreen(navController)
+                    }
+                }
             }
         }
     }
+}
+
+@Composable
+fun HomeScreen(navController: NavHostController) {
+    var showSearch by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+
+    Scaffold(
+        topBar = {
+            AppBar(
+                onSearchClick = { showSearch = !showSearch },
+                showSearch = showSearch,
+                searchQuery = searchQuery,
+                onSearchQueryChange = { searchQuery = it },
+                onCloseSearch = { showSearch = false },
+                navController = navController
+            )
+        },
+        content = { innerPadding ->
+            Column(modifier = Modifier.padding(innerPadding)) {
+                MainContent(navController)
+            }
+        },
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,7 +111,8 @@ fun AppBar(
     showSearch: Boolean,
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
-    onCloseSearch: () -> Unit
+    onCloseSearch: () -> Unit,
+    navController: NavHostController
 ) {
     TopAppBar(
         title = {
@@ -122,7 +144,7 @@ fun AppBar(
                     IconButton(onClick = { onSearchClick() }) {
                         Icon(Icons.Filled.Search, contentDescription = "Search")
                     }
-                    IconButton(onClick = { /* Handle User Icon Click */ }) {
+                    IconButton(onClick = { navController.navigate("login") }) {
                         Icon(Icons.Filled.Person, contentDescription = "User")
                     }
                 }
@@ -135,9 +157,9 @@ fun AppBar(
     }
 
 @Composable
-fun MainContent(modifier: Modifier = Modifier) {
+fun MainContent(navController: NavHostController) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .fillMaxWidth()
             .padding(16.dp),
@@ -183,7 +205,7 @@ fun MainContent(modifier: Modifier = Modifier) {
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Button(
-                    onClick = { /* Handle login click */ },
+                    onClick = { navController.navigate("login") },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Login to see favorites")
@@ -297,6 +319,6 @@ fun getCurrentDate(): String {
 @Composable
 fun GreetingPreview() {
     ArtsyMobileAppTheme {
-        MainContent()
+        HomeScreen(navController = rememberNavController())
     }
 }
