@@ -24,26 +24,21 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.lazy.items
 import android.util.Log
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
     var showSearch by remember { mutableStateOf(false) }
-    var searchQuery by remember { mutableStateOf("") }
 
     val viewModel = remember { SearchViewModel() }
     val searchState by viewModel::searchState
-    val query by viewModel::searchQuery
 
     Scaffold(
         topBar = {
             AppBar(
                 onSearchClick = { showSearch = !showSearch },
                 showSearch = showSearch,
-                searchQuery = searchQuery,
-                onSearchQueryChange = { searchQuery = it },
                 onCloseSearch = { showSearch = false },
                 navController = navController,
                 viewModel = viewModel,
@@ -56,19 +51,9 @@ fun HomeScreen(navController: NavHostController) {
                 } else {
                     when (searchState) {
                         is SearchState.Loading -> {
-                            Text(
-                                text = "Searching...",
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.fillMaxWidth().padding(16.dp)
-                            )
                         }
 
                         is SearchState.Error -> {
-                            Text(
-                                text = (searchState as SearchState.Error).message,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.fillMaxWidth().padding(16.dp)
-                            )
                         }
 
                         is SearchState.Success -> {
@@ -76,9 +61,7 @@ fun HomeScreen(navController: NavHostController) {
                             Log.d("HomeScreen", "Displaying ${results.size} artist cards.")
                             if (results.isEmpty()) {
                                 Text(
-                                    text = "No results found",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.fillMaxWidth().padding(16.dp)
+                                    text = ""
                                 )
                             } else {
                                 LazyColumn {
@@ -101,8 +84,6 @@ fun HomeScreen(navController: NavHostController) {
 fun AppBar(
     onSearchClick: () -> Unit,
     showSearch: Boolean,
-    searchQuery: String,
-    onSearchQueryChange: (String) -> Unit,
     onCloseSearch: () -> Unit,
     navController: NavHostController,
     viewModel: SearchViewModel

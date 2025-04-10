@@ -5,31 +5,43 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.background
+
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+
+import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
-
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.layout.ContentScale
+
 import coil.compose.rememberImagePainter
+
+import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
+
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,7 +69,6 @@ fun CustomizableSearchBar(
                 .padding(0.dp)
                 .semantics { traversalIndex = 0f },
             inputField = {
-                // Customizable input field implementation
                 SearchBarDefaults.InputField(
                     query = searchQuery,
                     onQueryChange = onSearchQueryChange,
@@ -79,14 +90,12 @@ fun CustomizableSearchBar(
             ),
         ) {
             if (searchResults.isEmpty()) {
-                // No search results, blank screen
                 Text(
                     text = "No results found",
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.fillMaxWidth().padding(16.dp)
                 )
             } else {
-                // Display search results in a LazyColumn
                 LazyColumn {
                     items(searchResults.size) { index ->
                         val artist = searchResults[index]
@@ -109,34 +118,53 @@ fun ArtistCard(artist: Artist, onClick: (Artist) -> Unit) {
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(250.dp)
         ) {
-            // Load the artist image using Coil
+
             val painter = rememberImagePainter(
-                data = artist.thumbnail, // URL of the image
+                data = artist.thumbnail,
                 builder = {
                     crossfade(true)
-//                    placeholder(androidx.compose.ui.R.drawable.ic_launcher_foreground)
-//                    error(androidx.compose.ui.R.drawable.ic_launcher_foreground)
+                    placeholder(R.drawable.artsy_logo)
+                    error(R.drawable.artsy_logo)
                 }
             )
             Image(
                 painter = painter,
                 contentDescription = artist.title,
                 modifier = Modifier
-                    .size(80.dp)
-                    .padding(end = 16.dp),
+                    .fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
 
-            // Artist name
-            Column {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .fillMaxWidth()
+                    .background(
+                        MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(4.dp)
+                    )
+                    .padding(16.dp)
+                    .clickable { onClick(artist) }
+            ) {
                 Text(
                     text = artist.title,
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = "Go to Artist Details",
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp),
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
+            )
         }
     }
 }
