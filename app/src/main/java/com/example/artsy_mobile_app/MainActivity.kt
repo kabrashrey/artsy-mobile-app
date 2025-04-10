@@ -176,41 +176,32 @@ fun MainContent(navController: NavHostController) {
         }
 
         // Favorite
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
+                .background(Color(0xFFF0F0F0))
+                .align(Alignment.CenterHorizontally)
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .background(Color(0xFFF0F0F0))
-                    .padding(16.dp)
-                    .align(Alignment.CenterHorizontally)
-            ) {
-                Text(
-                    text = "Favorites",
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    ),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+            Text(
+                text = "Favorites",
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                ),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
 
-                Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
-                Button(
-                    onClick = { navController.navigate("login") },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Login to see favorites")
-                }
-            }
+        Button(
+            onClick = { navController.navigate("login") },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Login to see favorites")
+        }
+
         Footer()
     }
 }
