@@ -25,7 +25,7 @@ sealed class SearchState {
 class SearchViewModel : ViewModel() {
     var searchState by mutableStateOf<SearchState>(SearchState.Loading)
 //    var searchResults = mutableStateOf<List<String>>(emptyList())
-    var searchQuery = mutableStateOf("")
+    var searchQuery by mutableStateOf("")
 
     private val client = HttpClient(Android){
         install(Logging){
@@ -63,8 +63,8 @@ class SearchViewModel : ViewModel() {
         }
     }
 
-    override fun Oncleared(){
-        super.onCleared()
-        client.close()
-    }
+//    override fun Oncleared(){
+//        super.onCleared()
+//        client.close()
+//    }
 }

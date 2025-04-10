@@ -280,27 +280,6 @@ fun CustomizableSearchBar(
 }
 
 @Composable
-fun Footer() {
-    val context = LocalContext.current
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .height(60.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "Powered by Artsy",
-            style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray),
-            modifier = Modifier.clickable {
-                val intent = Intent(Intent.ACTION_VIEW, "https://www.artsy.net".toUri())
-                context.startActivity(intent)
-            }
-        )
-    }
-}
-
-@Composable
 fun getCurrentDate(): String {
     val dateFormat = SimpleDateFormat("dd MMMM, yyyy", Locale.getDefault())
     return dateFormat.format(Date())
