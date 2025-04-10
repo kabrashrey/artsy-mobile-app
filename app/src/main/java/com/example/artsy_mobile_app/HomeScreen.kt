@@ -23,11 +23,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.lazy.items
+import android.util.Log
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
     var showSearch by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
+
+    val viewModel = remember { SearchViewModel() }
+    val searchState by viewModel::searchState
+    val query by viewModel::searchQuery
 
     Scaffold(
         topBar = {
@@ -37,16 +45,56 @@ fun HomeScreen(navController: NavHostController) {
                 searchQuery = searchQuery,
                 onSearchQueryChange = { searchQuery = it },
                 onCloseSearch = { showSearch = false },
-                navController = navController
+                navController = navController,
+                viewModel = viewModel,
             )
         },
         content = { innerPadding ->
             Column(modifier = Modifier.padding(innerPadding)) {
-                MainContent(navController)
+                if (!showSearch) {
+                    MainContent(navController)
+                } else {
+                    when (searchState) {
+                        is SearchState.Loading -> {
+                            Text(
+                                text = "Searching...",
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.fillMaxWidth().padding(16.dp)
+                            )
+                        }
+
+                        is SearchState.Error -> {
+                            Text(
+                                text = (searchState as SearchState.Error).message,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.fillMaxWidth().padding(16.dp)
+                            )
+                        }
+
+                        is SearchState.Success -> {
+                            val results = (searchState as SearchState.Success).results
+                            Log.d("HomeScreen", "Displaying ${results.size} artist cards.")
+                            if (results.isEmpty()) {
+                                Text(
+                                    text = "No results found",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.fillMaxWidth().padding(16.dp)
+                                )
+                            } else {
+                                LazyColumn {
+                                    items(results) { artist ->
+                                        ArtistCard(artist = artist, onClick = { /* Handle click */ })
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
     )
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,17 +104,29 @@ fun AppBar(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
     onCloseSearch: () -> Unit,
-    navController: NavHostController
+    navController: NavHostController,
+    viewModel: SearchViewModel
 ) {
+    val searchState by viewModel::searchState
+    val query by viewModel::searchQuery
+
     TopAppBar(
         title = {
             if (showSearch) {
                 CustomizableSearchBar(
-                    searchQuery = searchQuery,
-                    onSearchQueryChange = onSearchQueryChange,
-                    onSearch = { query -> /* Perform search logic */ },
-                    searchResults = listOf("Van Gogh", "Monet", "Da Vinci", "Picasso"),
-                    onResultClick = { /* Handle result click */ },
+                    searchQuery = query,
+                    onSearchQueryChange = { viewModel.onSearchQueryChange(it) },
+                    onSearch = { viewModel.onSearchQueryChange(it) },
+                    searchResults = if (searchState is SearchState.Success) {
+                        (searchState as SearchState.Success).results
+                    } else {
+                        emptyList()
+                    },
+                    onResultClick = { selected ->
+                        // You can handle click here (e.g., navigate to artist detail)
+                       //navController.navigate("artistDetail/${selected.id}")
+                        onCloseSearch()
+                    },
                     leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Search") },
                     trailingIcon = {
                         IconButton(onClick = { onCloseSearch() }) {

@@ -9,8 +9,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
@@ -21,11 +19,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.rememberImagePainter
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,16 +38,13 @@ fun CustomizableSearchBar(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
     onSearch: (String) -> Unit,
-    searchResults: List<String>,
-    onResultClick: (String) -> Unit,
+    searchResults: List<Artist>,
+    onResultClick: (Artist) -> Unit,
     modifier: Modifier = Modifier,
     placeholder: @Composable () -> Unit = { Text("Search artists...") },
     leadingIcon: @Composable (() -> Unit)? = { Icon(Icons.Default.Search, contentDescription = "Search") },
     trailingIcon: @Composable (() -> Unit)? = null,
-    supportingContent: (@Composable (String) -> Unit)? = null,
-    leadingContent: (@Composable () -> Unit)? = null,
 ) {
-    // Track expanded state of search bar
     var expanded by rememberSaveable { mutableStateOf(false) }
 
     Box(
@@ -76,24 +78,64 @@ fun CustomizableSearchBar(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
             ),
         ) {
-            // Show search results in a lazy column for better performance
-            LazyColumn {
-                items(count = searchResults.size) { index ->
-                    val resultText = searchResults[index]
-                    ListItem(
-                        headlineContent = { Text(resultText) },
-                        supportingContent = supportingContent?.let { { it(resultText) } },
-                        leadingContent = leadingContent,
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                        modifier = Modifier
-                            .clickable {
-                                onResultClick(resultText)
-                                expanded = false
-                            }
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 4.dp)
-                    )
+            if (searchResults.isEmpty()) {
+                // No search results, blank screen
+                Text(
+                    text = "No results found",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.fillMaxWidth().padding(16.dp)
+                )
+            } else {
+                // Display search results in a LazyColumn
+                LazyColumn {
+                    items(searchResults.size) { index ->
+                        val artist = searchResults[index]
+                        ArtistCard(artist = artist, onClick = { onResultClick(artist) })
+                    }
                 }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun ArtistCard(artist: Artist, onClick: (Artist) -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable { onClick(artist) },
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            // Load the artist image using Coil
+            val painter = rememberImagePainter(
+                data = artist.thumbnail, // URL of the image
+                builder = {
+                    crossfade(true)
+//                    placeholder(androidx.compose.ui.R.drawable.ic_launcher_foreground)
+//                    error(androidx.compose.ui.R.drawable.ic_launcher_foreground)
+                }
+            )
+            Image(
+                painter = painter,
+                contentDescription = artist.title,
+                modifier = Modifier
+                    .size(80.dp)
+                    .padding(end = 16.dp),
+                contentScale = ContentScale.Crop
+            )
+
+            // Artist name
+            Column {
+                Text(
+                    text = artist.title,
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
         }
     }
