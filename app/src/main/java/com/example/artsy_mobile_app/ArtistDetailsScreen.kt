@@ -20,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.AccountBox
-import androidx.compose.material.icons.outlined.Person
 
 import androidx.compose.material3.*
 import androidx.compose.material3.CircularProgressIndicator
@@ -36,15 +35,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 
 
+
+
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavHostController
 
 import androidx.lifecycle.viewmodel.compose.viewModel
-
 
 
 
@@ -93,7 +94,13 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                     Tab(
                         selected = selectedTabIndex == 2,
                         onClick = { selectedTabIndex = 2 },
-                        icon = { Icon(Icons.Outlined.Person, contentDescription = "Similar Artists") },
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.person_search),
+                                contentDescription = "Similar Artists",
+                                modifier = Modifier.size(24.dp)
+                            )
+                        },
                         text = { Text("Similar") }
                     )
                 }
