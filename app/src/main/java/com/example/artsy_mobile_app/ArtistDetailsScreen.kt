@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.*
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -18,6 +20,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Person
 
+import androidx.compose.material3.*
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -37,21 +40,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavHostController
+import androidx.compose.ui.draw.clip
+
+import coil.compose.AsyncImage
 import androidx.lifecycle.viewmodel.compose.viewModel
-
-
 
 
 
 @Composable
 fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
     val viewModel: ArtistDetailsViewModel = viewModel()
+    val artworksViewModel: ArtworksViewModel = viewModel()
     val state =  viewModel.state
 
-    var selectedTabIndex by remember { mutableStateOf(0) }
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(artistId) {
         viewModel.fetchArtistDetails(artistId)
+        artworksViewModel.fetchArtworks(artistId)
     }
 
     val artistName = when (val currentState = state.value) {
@@ -136,6 +142,7 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                         }
                     }
                     1 -> {
+                        val artworksState = artworksViewModel.artworksState
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -143,7 +150,56 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
-                            Text(text = "Artworks will be shown here.")
+                            when (artworksState) {
+                                is ArtworksState.Loading -> {
+                                    CircularProgressIndicator()
+                                }
+
+                                is ArtworksState.Error -> {
+                                    Text(text = artworksState.message)
+                                }
+                                is ArtworksState.Success -> {
+                                    artworksState.results.forEach { artist ->
+                                        Card(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 8.dp),
+                                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(16.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                artist.thumbnail?.let { imageUrl ->
+                                                    AsyncImage(
+                                                        model = imageUrl,
+                                                        contentDescription = artist.title,
+                                                        modifier = Modifier
+                                                            .size(80.dp)
+                                                            .clip(RoundedCornerShape(8.dp))
+                                                    )
+                                                }
+
+                                                Spacer(modifier = Modifier.width(16.dp))
+
+                                                Column {
+                                                    Text(
+                                                        text = artist.title,
+                                                        style = MaterialTheme.typography.titleMedium
+                                                    )
+                                                    Text(
+                                                        text = "ID: ${artist.id}",
+                                                        style = MaterialTheme.typography.bodySmall
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                            }
                         }
                     }
                     2 -> {

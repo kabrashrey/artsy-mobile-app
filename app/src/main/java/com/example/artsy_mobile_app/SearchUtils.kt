@@ -9,7 +9,6 @@ import io.ktor.client.engine.android.*
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.statement.bodyAsText
-import kotlinx.serialization.json.Json
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.serialization.Serializable
@@ -77,9 +76,7 @@ class SearchViewModel : ViewModel() {
             val response: String = client.get(url).bodyAsText()
             Log.i("SearchAPI", "Raw JSON: $response")
 
-            val searchResponse = Json {
-                ignoreUnknownKeys = true
-            }.decodeFromString<SearchResponse>(response)
+            val searchResponse = jsonParser.decodeFromString<SearchResponse>(response)
 
             Log.d("SearchAPI", "Parsed Artists: ${searchResponse.data}")
             searchResponse.data

@@ -9,7 +9,6 @@ import io.ktor.client.engine.android.*
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.statement.bodyAsText
-import kotlinx.serialization.json.Json
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.serialization.Serializable
@@ -67,7 +66,7 @@ class ArtistDetailsViewModel : ViewModel() {
             val response: String = client.get(url).bodyAsText()
             Log.i("ArtistDetailsAPI", "Raw JSON: $response")
 
-            val artistResponse = Json { ignoreUnknownKeys = true }.decodeFromString<ArtistDetailsResponse>(response)
+            val artistResponse = jsonParser.decodeFromString<ArtistDetailsResponse>(response)
 
             if (artistResponse.success) {
                 Log.d("ArtistDetailsAPI", "Fetched artist details: ${artistResponse.data}")
