@@ -4,6 +4,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,7 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -40,13 +42,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavHostController
-import androidx.compose.ui.draw.clip
 
-import coil.compose.AsyncImage
 import androidx.lifecycle.viewmodel.compose.viewModel
 
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+
 
 
 @Composable
@@ -81,17 +80,21 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                     Tab(
                         selected = selectedTabIndex == 0,
                         onClick = { selectedTabIndex = 0 },
-                        icon = { Icon(Icons.Outlined.Info, contentDescription = "Details") }
+                        icon = { Icon(Icons.Outlined.Info, contentDescription = "Details") },
+                        text = { Text("Details") }
+
                     )
                     Tab(
                         selected = selectedTabIndex == 1,
                         onClick = { selectedTabIndex = 1 },
-                        icon = { Icon(Icons.Outlined.AccountBox, contentDescription = "Artworks") }
+                        icon = { Icon(Icons.Outlined.AccountBox, contentDescription = "Artworks") },
+                        text = { Text("Artworks") }
                     )
                     Tab(
                         selected = selectedTabIndex == 2,
                         onClick = { selectedTabIndex = 2 },
-                        icon = { Icon(Icons.Outlined.Person, contentDescription = "Similar Artists") }
+                        icon = { Icon(Icons.Outlined.Person, contentDescription = "Similar Artists") },
+                        text = { Text("Similar") }
                     )
                 }
 
@@ -154,7 +157,27 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                                 }
 
                                 is ArtworksState.Error -> {
-                                    Text(text = artworksState.message)
+                                    Surface(
+                                        shape = RoundedCornerShape(50),
+                                        color = MaterialTheme.colorScheme.primaryContainer,
+                                        modifier = Modifier
+                                            .padding(8.dp)
+                                            .wrapContentSize()
+                                            .fillMaxWidth()
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                                            contentAlignment = Alignment.Center
+                                        ){
+                                            Text(
+                                                text = "No Artworks",
+                                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                                style = MaterialTheme.typography.bodyMedium
+                                            )
+                                        }
+                                    }
                                 }
                                 is ArtworksState.Success -> {
                                     LazyColumn {
