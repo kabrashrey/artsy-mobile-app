@@ -66,7 +66,8 @@ fun HomeScreen(navController: NavHostController) {
                             } else {
                                 LazyColumn {
                                     items(results) { artist ->
-                                        ArtistCard(artist = artist, onClick = { /* Handle click */ })
+                                        ArtistCard(artist = artist,
+                                            onClick = { navController.navigate("artistDetails/${artist.id}") })
                                     }
                                 }
                             }

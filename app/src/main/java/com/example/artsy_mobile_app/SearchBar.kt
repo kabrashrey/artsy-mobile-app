@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.background
@@ -35,12 +34,9 @@ import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.layout.ContentScale
-
-import coil.compose.rememberImagePainter
+import androidx.compose.ui.res.painterResource
 
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
-
 
 
 
@@ -118,29 +114,19 @@ fun ArtistCard(artist: Artist, onClick: (Artist) -> Unit) {
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(250.dp)
+        Box(modifier = Modifier.fillMaxWidth()
         ) {
-
-            val painter = rememberImagePainter(
-                data = artist.thumbnail,
-                builder = {
-                    crossfade(true)
-                    placeholder(R.drawable.artsy_logo)
-                    error(R.drawable.artsy_logo)
-                }
-            )
-            Image(
-                painter = painter,
+            AsyncImage(
+                model = artist.thumbnail,
                 contentDescription = artist.title,
                 modifier = Modifier
-                    .fillMaxSize(),
-                contentScale = ContentScale.Crop
+                    .fillMaxWidth()
+                    .height(200.dp),
+                contentScale = ContentScale.Crop,
+                placeholder = painterResource(id = R.drawable.artsy_logo),
+                error = painterResource(id = R.drawable.artsy_logo),
             )
-
-            Column(
+            Row(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .fillMaxWidth()
@@ -156,12 +142,13 @@ fun ArtistCard(artist: Artist, onClick: (Artist) -> Unit) {
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
+
             }
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = "Go to Artist Details",
                 modifier = Modifier
-                    .align(Alignment.BottomEnd)
+                        .align(Alignment.BottomEnd)
                     .padding(16.dp),
                 tint = MaterialTheme.colorScheme.onPrimaryContainer
             )

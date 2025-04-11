@@ -51,6 +51,13 @@ class MainActivity : ComponentActivity() {
                     composable ("register") {
                         RegisterScreen(navController)
                     }
+                    composable("artistDetails/{artistId}") { backStackEntry ->
+                        val artistId = backStackEntry.arguments?.getString("artistId")
+                        if (artistId != null) {
+                            ArtistDetailsScreen(artistId = artistId, navController)
+                        }
+                    }
+
                 }
             }
         }
