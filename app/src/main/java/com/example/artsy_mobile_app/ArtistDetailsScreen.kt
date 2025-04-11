@@ -16,9 +16,9 @@ import androidx.compose.foundation.layout.*
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.AccountBox
+import androidx.compose.material.icons.outlined.Person
 
 import androidx.compose.material3.*
 import androidx.compose.material3.CircularProgressIndicator
@@ -47,7 +47,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-
 
 
 @Composable
@@ -82,17 +81,17 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                     Tab(
                         selected = selectedTabIndex == 0,
                         onClick = { selectedTabIndex = 0 },
-                        icon = { Icon(Icons.Filled.Info, contentDescription = "Info") }
+                        icon = { Icon(Icons.Outlined.Info, contentDescription = "Details") }
                     )
                     Tab(
                         selected = selectedTabIndex == 1,
                         onClick = { selectedTabIndex = 1 },
-                        icon = { Icon(Icons.Filled.AccountBox, contentDescription = "Artworks") }
+                        icon = { Icon(Icons.Outlined.AccountBox, contentDescription = "Artworks") }
                     )
                     Tab(
                         selected = selectedTabIndex == 2,
                         onClick = { selectedTabIndex = 2 },
-                        icon = { Icon(Icons.Filled.Person, contentDescription = "Similar Artists") }
+                        icon = { Icon(Icons.Outlined.Person, contentDescription = "Similar Artists") }
                     )
                 }
 
@@ -100,16 +99,13 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                     0 -> {
                         when (val currentState = state.value) {
                             is ArtistDetailsState.Loading -> {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
                                     CircularProgressIndicator()
-                                }
                             }
+
+                            is ArtistDetailsState.Error -> {
+                                Text(text = (state.value as ArtistDetailsState.Error).message)
+                            }
+
                             is ArtistDetailsState.Success -> {
                                 val artistDetails = currentState.artistDetails
                                 val scrollState = rememberScrollState()
@@ -141,9 +137,6 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                                     Text(text = "${artistDetails?.biography}")
                                 }
                             }
-                            is ArtistDetailsState.Error -> {
-                                Text(text = (state.value as ArtistDetailsState.Error).message)
-                            }
                         }
                     }
                     1 -> {
@@ -164,38 +157,9 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                                     Text(text = artworksState.message)
                                 }
                                 is ArtworksState.Success -> {
-                                    artworksState.results.forEach { artist ->
-                                        Card(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(vertical = 8.dp),
-                                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                                        ) {
-                                            Row(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(16.dp),
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                artist.thumbnail?.let { imageUrl ->
-                                                    AsyncImage(
-                                                        model = imageUrl,
-                                                        contentDescription = artist.title,
-                                                        modifier = Modifier
-                                                            .size(80.dp)
-                                                            .clip(RoundedCornerShape(8.dp))
-                                                    )
-                                                }
-
-                                                Spacer(modifier = Modifier.width(16.dp))
-
-                                                Column {
-                                                    Text(
-                                                        text = artist.title,
-                                                        style = MaterialTheme.typography.titleMedium
-                                                    )
-                                                }
-                                            }
+                                    LazyColumn {
+                                        items(artworksState.results) { artist ->
+                                            ArtworksCard(artist = artist, onClick = {})
                                         }
                                     }
                                 }
@@ -208,49 +172,16 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
 
                         when (similarArtistsState) {
                             is SimilarArtistsState.Loading -> {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
-                                ) {
                                     CircularProgressIndicator()
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Text(text = "Loading similar artists...")
-                                }
                             }
 
                             is SimilarArtistsState.Success -> {
-                                LazyColumn(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
+                                LazyColumn {
                                     items(similarArtistsState.results) { artist ->
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(8.dp)
-                                        ) {
-                                            artist.thumbnail?.let { imageUrl ->
-                                                AsyncImage(
-                                                    model = imageUrl,
-                                                    contentDescription = artist.name,
-                                                    modifier = Modifier
-                                                        .size(60.dp)
-                                                        .clip(RoundedCornerShape(8.dp))
-                                                )
-                                                Spacer(modifier = Modifier.width(12.dp))
-                                            }
-                                            Text(text = artist.name, style = MaterialTheme.typography.bodyLarge)
-                                        }
+                                        SimilarArtistCard(artist = artist, onClick = {})
                                     }
                                 }
                             }
-
                             is SimilarArtistsState.Error -> {
                                 Column(
                                     modifier = Modifier
@@ -259,7 +190,10 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.Center
                                 ) {
-                                    Text(text = similarArtistsState.message, color = MaterialTheme.colorScheme.error)
+                                    Text(
+                                        text = similarArtistsState.message,
+                                        color = MaterialTheme.colorScheme.error
+                                    )
                                 }
                             }
                         }
