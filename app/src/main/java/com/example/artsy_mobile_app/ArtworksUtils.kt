@@ -36,7 +36,6 @@ sealed class ArtworksState {
 
 class ArtworksViewModel : ViewModel() {
     var artworksState by mutableStateOf<ArtworksState>(ArtworksState.Loading)
-//    var artworksQuery by mutableStateOf("")
 
     private val client = HttpClient(Android) {
         install(Logging) {
