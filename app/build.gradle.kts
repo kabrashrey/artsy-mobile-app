@@ -74,4 +74,8 @@ dependencies {
     implementation(libs.accompanist.pager)
     implementation(libs.accompanist.pager.indicators)
     implementation(libs.compose.foundation)
+    implementation(libs.okhttp)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
 }

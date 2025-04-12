@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 
@@ -28,7 +29,9 @@ fun Footer() {
     ) {
         Text(
             text = "Powered by Artsy",
-            style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray),
+            style = MaterialTheme.typography.bodyMedium.copy(
+                color = Color.Gray,
+                fontStyle = FontStyle.Italic),
             modifier = Modifier.clickable {
                 val intent = Intent(Intent.ACTION_VIEW, "https://www.artsy.net".toUri())
                 context.startActivity(intent)

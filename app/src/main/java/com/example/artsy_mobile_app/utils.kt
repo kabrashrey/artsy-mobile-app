@@ -1,5 +1,7 @@
 package com.example.artsy_mobile_app
 
+import PersistentCookieJar
+import android.content.Context
 import androidx.compose.runtime.Composable
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -16,6 +18,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
+import okhttp3.OkHttpClient
+import java.util.concurrent.TimeUnit
 
 @Composable
 fun getCurrentDate(): String {
@@ -45,5 +53,32 @@ fun LoadingIndicator() {
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = "Loading...")
         }
+    }
+}
+
+
+
+object KtorClientProvider {
+    private var client: HttpClient? = null
+
+    fun getClient(context: Context): HttpClient {
+        if (client == null) {
+            val cookieJar = PersistentCookieJar(context)
+
+            val okHttpClient = OkHttpClient.Builder()
+                .cookieJar(cookieJar)
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .build()
+
+            client = HttpClient(OkHttp) {
+                engine {
+                    preconfigured = okHttpClient
+                }
+                install(ContentNegotiation) {
+                    json(Json { ignoreUnknownKeys = true })
+                }
+            }
+        }
+        return client!!
     }
 }

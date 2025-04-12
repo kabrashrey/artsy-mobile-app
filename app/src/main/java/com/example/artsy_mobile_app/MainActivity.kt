@@ -40,6 +40,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        UserSessionManager.init(applicationContext)
+
         setContent {
             ArtsyMobileAppTheme {
                 val navController = rememberNavController()
@@ -58,7 +60,6 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("artistDetails/{artistId}") { backStackEntry ->
                         val artistId = backStackEntry.arguments?.getString("artistId")
-                        Log.d("NAVIGATION", "Navigating to artist with ID: $artistId")
                         if (artistId != null) {
                             ArtistDetailsScreen(artistId = artistId, navController)
                         }
@@ -67,58 +68,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-}
-
-@Composable
-fun MainContent(navController: NavHostController) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .fillMaxWidth()
-            .padding(16.dp),
-    ) {
-        // Today's Date
-        Box(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = getCurrentDate(),
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
-                color = Color.Gray
-            )
-        }
-
-        // Favorite
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .background(Color(0xFFF0F0F0))
-                .align(Alignment.CenterHorizontally)
-        ) {
-            Text(
-                text = "Favorites",
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
-                ),
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.align(Alignment.Center)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Button(
-            onClick = { navController.navigate("login") },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Login to see favorites")
-        }
-
-        Footer()
     }
 }
 

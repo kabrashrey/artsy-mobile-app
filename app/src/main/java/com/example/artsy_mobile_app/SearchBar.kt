@@ -109,14 +109,12 @@ fun ArtistSearchBar(
                                   },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
                     trailingIcon = {
-                        if (searchQuery.isNotEmpty()) {
-                            IconButton(onClick = {
-                                onClearQuery()
-                                expanded = false
-                                navController.popBackStack()
-                            }) {
-                                Icon(Icons.Default.Close, contentDescription = "Clear")
-                            }
+                        IconButton(onClick = {
+                            onClearQuery() // optional: clear search query
+                            expanded = false
+                            navController.popBackStack()
+                        }) {
+                            Icon(Icons.Default.Close, contentDescription = "Close")
                         }
                     },
                     colors = TextFieldDefaults.colors(

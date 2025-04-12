@@ -23,8 +23,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
+
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun LoginScreen(navController: NavHostController){
@@ -73,6 +77,11 @@ fun LoginMainContent(navController: NavHostController){
 
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
+
+    val context = LocalContext.current
+
+    val viewModel: LoginViewModel = viewModel()
+    val loginState by viewModel.loginState.collectAsState()
 
     Column(
         modifier = Modifier
@@ -137,11 +146,38 @@ fun LoginMainContent(navController: NavHostController){
                     passwordError = "Password cannot be empty"
                     valid = false
                 }
-                if(valid) { /*Handle login */ }
-                      },
-            modifier = Modifier.fillMaxWidth()
+                if(valid) {
+                    viewModel.login(context, email, password)
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = loginState !is LoginState.Loading
         ) {
-            Text("Login")
+            if (loginState is LoginState.Loading) {
+                CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
+            } else {
+                Text("Login")
+            }
+        }
+
+        when (loginState) {
+            is LoginState.Error -> {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = "Login Failed",
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+
+            is LoginState.Success -> {
+                LaunchedEffect(Unit) {
+                    email = ""
+                    password = ""
+                    viewModel.resetState()
+                    navController.navigate("home")
+                }
+            }
+            else -> {}
         }
 
         Spacer(modifier = Modifier.height(8.dp))

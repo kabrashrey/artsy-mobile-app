@@ -1,2 +1,89 @@
 package com.example.artsy_mobile_app
+import com.example.artsy_mobile_app.LoginRepository.loginUser
+
+import android.content.Context
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.client.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+
+import io.ktor.client.engine.okhttp.*
+
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.serialization.kotlinx.json.*
+import android.util.Log
+
+val json = Json { ignoreUnknownKeys = true }
+
+@Serializable
+data class User(
+    val _id: String,
+    val name: String,
+    val email: String,
+    val avatar: String
+)
+
+@Serializable
+data class LoginRequest(val email: String, val password: String)
+
+sealed class LoginState {
+    object Idle : LoginState()
+    object Loading : LoginState()
+    data class Success(val message: String) : LoginState()
+    data class Error(val error: String) : LoginState()
+}
+
+class LoginViewModel : ViewModel() {
+    private val _loginState = MutableStateFlow<LoginState>(LoginState.Idle)
+    val loginState: StateFlow<LoginState> = _loginState
+
+    fun login(context: Context, email: String, password: String) {
+        _loginState.value = LoginState.Loading
+        viewModelScope.launch {
+            val result = loginUser(context, email, password)
+            _loginState.value = result.fold(
+                onSuccess = { LoginState.Success("Logged in successfully!") },
+                onFailure = { LoginState.Error(it.message ?: "Unknown error") }
+            )
+        }
+    }
+
+    fun resetState() {
+        _loginState.value = LoginState.Idle
+    }
+}
+
+
+object LoginRepository {
+    suspend fun loginUser(context: Context, email: String, password: String): Result<Unit> {
+        return runCatching {
+            val client = HttpClient(OkHttp) {
+                install(ContentNegotiation) {
+                    json(Json { ignoreUnknownKeys = true })
+                }
+            }
+
+            val response = client.post("https://artsy-shrey-3.wl.r.appspot.com/api/users/login") {
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("email" to email, "password" to password))
+            }
+
+            if (response.status != HttpStatusCode.OK) {
+                throw Exception("Login failed with status: ${response.status}")
+            }
+
+            val responseBody = response.body<JsonObject>()
+            val data = responseBody["data"]?.jsonObject ?: throw Exception("Invalid response")
 
