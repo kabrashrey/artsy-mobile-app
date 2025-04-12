@@ -1,10 +1,8 @@
 package com.example.artsy_mobile_app
 
 import android.util.Log
-import androidx.compose.foundation.layout.Arrangement
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -12,11 +10,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.absoluteOffset
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -49,7 +44,6 @@ import kotlinx.serialization.SerialName
 import androidx.lifecycle.ViewModel
 import coil.compose.AsyncImage
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.zIndex
 
 @Serializable
 data class CategoriesResponse(
@@ -99,9 +93,9 @@ class CategoriesViewModel : ViewModel() {
             val response: String = client.get(url).bodyAsText()
             Log.i("CategoriesAPI", "Raw JSON: $response")
 
-            val similarArtistResponse = jsonParser.decodeFromString<CategoriesResponse>(response)
-            Log.d("CategoriesAPI", "Parsed Categories: ${similarArtistResponse.data}")
-            similarArtistResponse.data
+            val categoriesResponse = jsonParser.decodeFromString<CategoriesResponse>(response)
+            Log.d("CategoriesAPI", "Parsed Categories: ${categoriesResponse.data}")
+            categoriesResponse.data
         } catch (e: Exception) {
             Log.e("CategoriesError", "Error fetching Categories results: ${e.message}")
             emptyList()
@@ -156,13 +150,6 @@ fun CategoriesCarousel(
                         modifier = Modifier
                             .padding(top = 16.dp)
                     )
-
-//                    Text(
-//                        text = category.data,
-//                        style = MaterialTheme.typography.titleSmall,
-//                        modifier = Modifier
-//                            .padding(top = 16.dp)
-//                    )
                 }
             }
         }

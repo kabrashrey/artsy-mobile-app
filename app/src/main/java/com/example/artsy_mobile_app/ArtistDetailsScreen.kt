@@ -101,7 +101,6 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                             style = MaterialTheme.typography.headlineLarge,
                             modifier = Modifier
                                 .align(Alignment.Start)
-//                                .padding(bottom = 12.dp)
                         )
 
                         CategoriesCarousel(categories = categoryState.results)
@@ -127,6 +126,62 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                             ) {
                                 Text("Close")
                             }
+                        }
+                    }
+                }
+            }
+        }
+    } else if (showCarousel && categoryState is CategoriesState.Error) {
+        Dialog(onDismissRequest = {
+            showCarousel = false
+            selectedArtworkId = null
+        }) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier
+                        .height(200.dp)
+                        .fillMaxWidth()
+                ) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        Text(
+                            text = "Categories",
+                            style = MaterialTheme.typography.headlineLarge,
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .padding(16.dp)
+                        )
+
+                        Text(
+                            text = "No Categories available",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.align(Alignment.Center),
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Button(
+                            onClick = {
+                                showCarousel = false
+                                selectedArtworkId = null
+                            },
+                            shape = RoundedCornerShape(50),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            ),
+                            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(16.dp)
+                        ) {
+                            Text("Close")
                         }
                     }
                 }
