@@ -47,6 +47,9 @@ class MainActivity : ComponentActivity() {
                     composable("home") {
                         HomeScreen(navController)
                     }
+                    composable("search") {
+                        SearchScreen(navController)
+                    }
                     composable("login") {
                         LoginScreen(navController)
                     }
@@ -122,7 +125,7 @@ fun MainContent(navController: NavHostController) {
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun MainPreview() {
     ArtsyMobileAppTheme {
         HomeScreen(navController = rememberNavController())
     }
