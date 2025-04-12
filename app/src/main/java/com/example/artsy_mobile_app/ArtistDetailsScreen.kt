@@ -115,7 +115,14 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                                         .fillMaxSize(),
                                     contentAlignment = Alignment.TopCenter
                                 ) {
-                                    CircularProgressIndicator()
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        modifier = Modifier.padding(top = 32.dp)
+                                    ) {
+                                        CircularProgressIndicator()
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Text(text = "Loading...")
+                                    }
                                 }
                             }
 
@@ -172,7 +179,14 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                                             .fillMaxSize(),
                                         contentAlignment = Alignment.TopCenter
                                     ) {
-                                        CircularProgressIndicator()
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            modifier = Modifier.padding(top = 32.dp)
+                                        ) {
+                                            CircularProgressIndicator()
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                            Text(text = "Loading...")
+                                        }
                                     }
                                 }
 
@@ -220,7 +234,14 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                                         .fillMaxSize(),
                                     contentAlignment = Alignment.TopCenter
                                 ) {
-                                    CircularProgressIndicator()
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        modifier = Modifier.padding(top = 32.dp)
+                                    ) {
+                                        CircularProgressIndicator()
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Text(text = "Loading...")
+                                    }
                                 }
                             }
 
