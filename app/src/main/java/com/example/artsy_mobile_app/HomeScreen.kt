@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -131,7 +131,7 @@ fun AppBar(
                     Icon(Icons.Filled.Search, contentDescription = "Search")
                 }
                 IconButton(onClick = { navController.navigate("login") }) {
-                    Icon(Icons.Filled.Person, contentDescription = "User")
+                    Icon(Icons.Outlined.Person, contentDescription = "User")
                 }
             }
         },

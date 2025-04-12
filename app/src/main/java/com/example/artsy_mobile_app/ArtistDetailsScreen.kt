@@ -59,6 +59,7 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
     var selectedTabIndex by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(artistId) {
+        selectedTabIndex = 0
         viewModel.fetchArtistDetails(artistId)
         artworksViewModel.fetchArtworks(artistId)
         similarArtistsViewModel.fetchSimilarArtists(artistId)
@@ -109,7 +110,13 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                     0 -> {
                         when (val currentState = state.value) {
                             is ArtistDetailsState.Loading -> {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize(),
+                                    contentAlignment = Alignment.TopCenter
+                                ) {
                                     CircularProgressIndicator()
+                                }
                             }
 
                             is ArtistDetailsState.Error -> {
@@ -160,7 +167,13 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                         ) {
                             when (artworksState) {
                                 is ArtworksState.Loading -> {
-                                    CircularProgressIndicator()
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize(),
+                                        contentAlignment = Alignment.TopCenter
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
                                 }
 
                                 is ArtworksState.Error -> {
@@ -202,13 +215,24 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
 
                         when (similarArtistsState) {
                             is SimilarArtistsState.Loading -> {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize(),
+                                    contentAlignment = Alignment.TopCenter
+                                ) {
                                     CircularProgressIndicator()
+                                }
                             }
 
                             is SimilarArtistsState.Success -> {
                                 LazyColumn {
                                     items(similarArtistsState.results) { artist ->
-                                        SimilarArtistCard(artist = artist, onClick = {})
+                                        SimilarArtistCard(SimilarArtists = artist,
+                                            onClick = { selectedArtist ->
+                                                navController.navigate("artistDetails/${selectedArtist.id}") {
+                                                    popUpTo("artistDetails/{artistId}") { inclusive = true }
+                                                }}
+                                        )
                                     }
                                 }
                             }

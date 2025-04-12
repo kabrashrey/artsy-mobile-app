@@ -94,20 +94,20 @@ class SimilarArtistsViewModel : ViewModel() {
 
 
 @Composable
-fun SimilarArtistCard(artist: SimilarArtists, onClick: (SimilarArtists) -> Unit) {
+fun SimilarArtistCard(SimilarArtists: SimilarArtists, onClick: (SimilarArtists) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clickable { onClick(artist) },
+            .clickable { onClick(SimilarArtists) },
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Box(modifier = Modifier.fillMaxWidth()
         ) {
             AsyncImage(
-                model = artist.thumbnail,
-                contentDescription = artist.name,
+                model = SimilarArtists.thumbnail,
+                contentDescription = SimilarArtists.name,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp),
@@ -124,10 +124,10 @@ fun SimilarArtistCard(artist: SimilarArtists, onClick: (SimilarArtists) -> Unit)
                         shape = RoundedCornerShape(4.dp)
                     )
                     .padding(16.dp)
-                    .clickable { onClick(artist) }
+                    .clickable { onClick(SimilarArtists) }
             ) {
                 Text(
-                    text = artist.name,
+                    text = SimilarArtists.name,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )

@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.sp
 
 import androidx.compose.runtime.Composable
 
+import android.util.Log
+
 import com.example.artsy_mobile_app.ui.theme.ArtsyMobileAppTheme
 
 
@@ -53,6 +55,7 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("artistDetails/{artistId}") { backStackEntry ->
                         val artistId = backStackEntry.arguments?.getString("artistId")
+                        Log.d("NAVIGATION", "Navigating to artist with ID: $artistId")
                         if (artistId != null) {
                             ArtistDetailsScreen(artistId = artistId, navController)
                         }
