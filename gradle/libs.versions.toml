@@ -16,6 +16,8 @@ constraintlayout = "2.1.4"
 navigationCompose = "2.8.9"
 ktor = "2.3.0"
 coil = "2.4.0"
+accompanist = "0.30.1"
+compose-foundation = "1.6.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -44,6 +46,9 @@ ktor-client-serialization = { group = "io.ktor", name = "ktor-client-serializati
 ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.8.0" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+accompanist-pager = { group = "com.google.accompanist", name = "accompanist-pager", version.ref = "accompanist" }
+accompanist-pager-indicators = { group = "com.google.accompanist", name = "accompanist-pager-indicators", version.ref = "accompanist" }
+compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "compose-foundation" }
 
 
 [plugins]

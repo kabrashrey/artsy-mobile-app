@@ -90,6 +90,7 @@ fun MainContent(navController: NavHostController) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .background(Color(0xFFF0F0F0))
                 .align(Alignment.CenterHorizontally)
         ) {
@@ -100,6 +101,7 @@ fun MainContent(navController: NavHostController) {
                     fontSize = 20.sp
                 ),
                 textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.align(Alignment.Center)
             )
         }

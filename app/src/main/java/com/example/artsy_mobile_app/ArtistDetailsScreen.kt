@@ -22,20 +22,14 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.AccountBox
 
 import androidx.compose.material3.*
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-
-
-
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +41,10 @@ import androidx.navigation.NavHostController
 
 import androidx.lifecycle.viewmodel.compose.viewModel
 
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.platform.LocalConfiguration
+
+import android.util.Log
 
 
 @Composable
@@ -55,8 +53,12 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
     val artworksViewModel: ArtworksViewModel = viewModel()
     val similarArtistsViewModel: SimilarArtistsViewModel = viewModel()
     val state =  viewModel.state
-
     var selectedTabIndex by remember { mutableIntStateOf(0) }
+
+    val categoriesViewModel: CategoriesViewModel = viewModel()
+    var showCarousel by remember { mutableStateOf(false) }
+    var selectedArtworkId by remember { mutableStateOf<String?>(null) }
+    val categoryState = categoriesViewModel.categoriesState
 
     LaunchedEffect(artistId) {
         selectedTabIndex = 0
@@ -64,6 +66,74 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
         artworksViewModel.fetchArtworks(artistId)
         similarArtistsViewModel.fetchSimilarArtists(artistId)
     }
+
+    LaunchedEffect(selectedArtworkId) {
+        selectedArtworkId?.let { artworkId ->
+            categoriesViewModel.fetchCategories(artworkId)
+            showCarousel = true
+        }
+    }
+
+    if (showCarousel && categoryState is CategoriesState.Success) {
+        Dialog(onDismissRequest = {
+            showCarousel = false
+            selectedArtworkId = null
+        }) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 650.dp)
+                    .padding(16.dp)
+            ) {
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentHeight()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = "Categories",
+                            style = MaterialTheme.typography.headlineLarge,
+                            modifier = Modifier
+                                .align(Alignment.Start)
+//                                .padding(bottom = 12.dp)
+                        )
+
+                        CategoriesCarousel(categories = categoryState.results)
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        // Pill-shaped close button at bottom
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.BottomEnd
+                        ) {
+                            Button(
+                                onClick = {
+                                    showCarousel = false
+                                    selectedArtworkId = null
+                                },
+                                shape = RoundedCornerShape(50),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                ),
+                                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp)
+                            ) {
+                                Text("Close")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
     val artistName = when (val currentState = state.value) {
         is ArtistDetailsState.Success -> currentState.artistDetails?.title ?: ""
@@ -109,23 +179,7 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                 when (selectedTabIndex){
                     0 -> {
                         when (val currentState = state.value) {
-                            is ArtistDetailsState.Loading -> {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize(),
-                                    contentAlignment = Alignment.TopCenter
-                                ) {
-                                    Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        modifier = Modifier.padding(top = 32.dp)
-                                    ) {
-                                        CircularProgressIndicator()
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        Text(text = "Loading...")
-                                    }
-                                }
-                            }
-
+                            is ArtistDetailsState.Loading -> LoadingIndicator()
                             is ArtistDetailsState.Error -> {
                                 Text(text = (state.value as ArtistDetailsState.Error).message)
                             }
@@ -173,23 +227,7 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                             verticalArrangement = Arrangement.Center
                         ) {
                             when (artworksState) {
-                                is ArtworksState.Loading -> {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize(),
-                                        contentAlignment = Alignment.TopCenter
-                                    ) {
-                                        Column(
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            modifier = Modifier.padding(top = 32.dp)
-                                        ) {
-                                            CircularProgressIndicator()
-                                            Spacer(modifier = Modifier.height(8.dp))
-                                            Text(text = "Loading...")
-                                        }
-                                    }
-                                }
-
+                                is ArtworksState.Loading -> LoadingIndicator()
                                 is ArtworksState.Error -> {
                                     Surface(
                                         shape = RoundedCornerShape(50),
@@ -216,11 +254,17 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                                 is ArtworksState.Success -> {
                                     LazyColumn {
                                         items(artworksState.results) { artist ->
-                                            ArtworksCard(artist = artist, onClick = {})
+                                            ArtworksCard(
+                                                artist = artist,
+                                                onClick = {
+                                                    if (selectedArtworkId != artist.id) {
+                                                        selectedArtworkId = artist.id
+                                                    }
+                                                },
+                                            )
                                         }
                                     }
                                 }
-
                             }
                         }
                     }
@@ -228,35 +272,7 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                         val similarArtistsState = similarArtistsViewModel.similarArtistState
 
                         when (similarArtistsState) {
-                            is SimilarArtistsState.Loading -> {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize(),
-                                    contentAlignment = Alignment.TopCenter
-                                ) {
-                                    Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        modifier = Modifier.padding(top = 32.dp)
-                                    ) {
-                                        CircularProgressIndicator()
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        Text(text = "Loading...")
-                                    }
-                                }
-                            }
-
-                            is SimilarArtistsState.Success -> {
-                                LazyColumn {
-                                    items(similarArtistsState.results) { artist ->
-                                        SimilarArtistCard(SimilarArtists = artist,
-                                            onClick = { selectedArtist ->
-                                                navController.navigate("artistDetails/${selectedArtist.id}") {
-                                                    popUpTo("artistDetails/{artistId}") { inclusive = true }
-                                                }}
-                                        )
-                                    }
-                                }
-                            }
+                            is SimilarArtistsState.Loading -> LoadingIndicator()
                             is SimilarArtistsState.Error -> {
                                 Column(
                                     modifier = Modifier
@@ -271,10 +287,23 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                                     )
                                 }
                             }
+
+                            is SimilarArtistsState.Success -> {
+                                LazyColumn {
+                                    items(similarArtistsState.results) { artist ->
+                                        SimilarArtistCard(SimilarArtists = artist,
+                                            onClick = { selectedArtist ->
+                                                navController.navigate("artistDetails/${selectedArtist.id}") {
+                                                    popUpTo("artistDetails/{artistId}") { inclusive = true }
+                                                }
+                                            }
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
-
             }
         },
     )

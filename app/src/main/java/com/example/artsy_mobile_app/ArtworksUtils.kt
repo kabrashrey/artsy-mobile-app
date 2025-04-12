@@ -1,11 +1,8 @@
 package com.example.artsy_mobile_app
 
 import android.util.Log
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -22,18 +19,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.engine.android.*
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.statement.bodyAsText
-import androidx.lifecycle.ViewModel
-import coil.compose.AsyncImage
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
 
-
+import androidx.lifecycle.ViewModel
+import coil.compose.AsyncImage
 
 @Serializable
 data class ArtworksResponse(
@@ -98,7 +95,8 @@ class ArtworksViewModel : ViewModel() {
 
 
 @Composable
-fun ArtworksCard(artist: Artworks, onClick: (Artworks) -> Unit) {
+fun ArtworksCard(artist: Artworks, onClick: (Artworks) -> Unit )
+{
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -106,7 +104,8 @@ fun ArtworksCard(artist: Artworks, onClick: (Artworks) -> Unit) {
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Box(modifier = Modifier.fillMaxWidth()
+        Box(
+            modifier = Modifier.fillMaxWidth()
         ) {
             AsyncImage(
                 model = artist.thumbnail,
@@ -138,6 +137,5 @@ fun ArtworksCard(artist: Artworks, onClick: (Artworks) -> Unit) {
                 Text(text = "View Categories")
             }
         }
-
     }
 }
