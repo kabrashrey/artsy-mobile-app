@@ -94,6 +94,11 @@ object LoginRepository {
             val accessToken = data["accessToken"]?.jsonPrimitive?.content ?: ""
 
             val refreshToken = data["refreshToken"]?.jsonPrimitive?.content ?: ""
+
+            UserSessionManager.init(context)
+            UserSessionManager.saveSession(user, accessToken, refreshToken)
+
+            client.close()
         }
     }
 }
