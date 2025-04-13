@@ -245,7 +245,7 @@ fun MainContent(navController: NavHostController) {
                         contentAlignment = Alignment.Center
                     ){
                         Text(
-                            text = "No Artworks",
+                            text = "No Favorites",
                             color = MaterialTheme.colorScheme.onErrorContainer,
                             style = MaterialTheme.typography.bodyMedium
                         )

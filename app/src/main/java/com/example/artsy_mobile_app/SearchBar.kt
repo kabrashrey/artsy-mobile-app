@@ -110,7 +110,7 @@ fun ArtistSearchBar(
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
                     trailingIcon = {
                         IconButton(onClick = {
-                            onClearQuery() // optional: clear search query
+                            onClearQuery()
                             expanded = false
                             navController.popBackStack()
                         }) {

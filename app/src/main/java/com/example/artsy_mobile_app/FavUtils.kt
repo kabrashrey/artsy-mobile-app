@@ -80,3 +80,52 @@ class FavoriteArtistViewModel : ViewModel() {
             GetFavoriteArtistState.Error("No results found")
         }
     }
+
+    private suspend fun fetchFavoritesFromAPI(email: String): List<FavoriteArtist> {
+        val url = "https://artsy-shrey-3.wl.r.appspot.com/api/favourites/"
+        return try {
+            val response: String = client.get(url){
+                url{
+                    parameters.append("email", email)
+                }
+            }.body()
+            Log.i("GetFavAPI", "Raw JSON: $response")
+
+            val getFavResponse = jsonParser.decodeFromString<FavoritesResponse>(response)
+            Log.d("GetFavAPI", "Parsed Favs: ${getFavResponse.data}")
+            getFavResponse.data
+        } catch (e: Exception) {
+            Log.e("GetFavAPIError", "Error fetching Fav results: ${e.message}")
+            emptyList()
+        }
+    }
+}
+
+
+
+
+@Composable
+fun FavoriteArtistItem(artist: FavoriteArtist, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .clickable { onClick() }
+            .padding(16.dp)
+    ) {
+        Column {
+            Text("Name: ${artist.name}", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text("Nationality: ${artist.nationality}")
+            Text("Birth Year: ${artist.birthyear}")
+            Text("Added: ${artist.addedAt}")
+        }
+        Icon(
+            imageVector = Icons.Default.Search,
+            contentDescription = "View Details",
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .size(20.dp)
+        )
+    }
+}
+

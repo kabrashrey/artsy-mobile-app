@@ -87,3 +87,14 @@ object LoginRepository {
             val responseBody = response.body<JsonObject>()
             val data = responseBody["data"]?.jsonObject ?: throw Exception("Invalid response")
 
+            val userJson = data["user"]?.toString() ?: error("User not found")
+            val user = json.decodeFromString<User>(userJson)
+
+            // Extract tokens
+            val accessToken = data["accessToken"]?.jsonPrimitive?.content ?: ""
+
+            val refreshToken = data["refreshToken"]?.jsonPrimitive?.content ?: ""
+        }
+    }
+}
+
