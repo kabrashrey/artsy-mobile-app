@@ -24,6 +24,8 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 @Composable
 fun getCurrentDate(): String {
@@ -80,5 +82,22 @@ object KtorClientProvider {
             }
         }
         return client!!
+    }
+}
+
+object SnackbarManager {
+    private val _messages = MutableSharedFlow<String>()
+    val messages = _messages.asSharedFlow()
+
+    suspend fun showMessage(message: String) {
+        _messages.emit(message)
+    }
+}
+
+object HttpClientProvider {
+    val client = HttpClient(OkHttp) {
+        install(ContentNegotiation) {
+            json(Json { ignoreUnknownKeys = true })
+        }
     }
 }

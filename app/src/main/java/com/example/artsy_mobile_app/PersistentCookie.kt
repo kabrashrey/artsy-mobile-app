@@ -43,4 +43,9 @@ class PersistentCookieJar(context: Context) : CookieJar {
 
         if (map != null) cookieMap.putAll(map)
     }
+
+    fun clearCookies() {
+        prefs.edit { remove("cookies") }
+        cookieMap.clear()
+    }
 }

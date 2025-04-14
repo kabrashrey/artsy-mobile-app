@@ -1,11 +1,13 @@
 package com.example.artsy_mobile_app
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 
 import androidx.navigation.compose.*
 import androidx.navigation.NavHostController
@@ -25,20 +27,27 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(navController: NavHostController){
+fun LoginScreen(
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState,
+    scope: CoroutineScope
+){
     Scaffold(
         topBar = {
             LoginTopBar(navController = navController)
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         content = { innerPadding ->
             Column(modifier = Modifier.padding(innerPadding)) {
-                LoginMainContent(navController)
+                LoginMainContent(navController, snackbarHostState, scope)
             }
         },
     )
@@ -71,17 +80,26 @@ fun LoginTopBar(navController: NavHostController) {
 )}
 
 @Composable
-fun LoginMainContent(navController: NavHostController){
+fun LoginMainContent(
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState,
+    scope: CoroutineScope,
+){
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
-
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
 
     val context = LocalContext.current
-
     val viewModel: LoginViewModel = viewModel()
     val loginState by viewModel.loginState.collectAsState()
+
+    Log.i("LoginScreen", "loginState: $loginState")
+
+    fun clearFieldErrors() {
+        emailError = null
+        passwordError = null
+    }
 
     Column(
         modifier = Modifier
@@ -95,7 +113,7 @@ fun LoginMainContent(navController: NavHostController){
             value = email,
             onValueChange = {
                 email = it
-                emailError = null
+                clearFieldErrors()
             },
             label = { Text("Email") },
             modifier = Modifier.fillMaxWidth(),
@@ -115,7 +133,7 @@ fun LoginMainContent(navController: NavHostController){
             value = password,
             onValueChange = {
                 password = it
-                passwordError = null
+                clearFieldErrors()
             },
             label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation(),
@@ -154,7 +172,9 @@ fun LoginMainContent(navController: NavHostController){
             enabled = loginState !is LoginState.Loading
         ) {
             if (loginState is LoginState.Loading) {
-                CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary)
             } else {
                 Text("Login")
             }
@@ -173,8 +193,13 @@ fun LoginMainContent(navController: NavHostController){
                 LaunchedEffect(Unit) {
                     email = ""
                     password = ""
+                    scope.launch {
+                        snackbarHostState.showSnackbar("Logged in successfully")
+                    }
+                    navController.navigate("home") {
+                        popUpTo("login") { inclusive = true }
+                    }
                     viewModel.resetState()
-                    navController.navigate("home")
                 }
             }
             else -> {}
@@ -206,6 +231,11 @@ fun LoginMainContent(navController: NavHostController){
 @Preview(showBackground = true)
 @Composable
 fun LoginScreenPreview() {
-    LoginScreen(navController = rememberNavController())
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    LoginScreen(
+        navController = rememberNavController(),
+        snackbarHostState = snackbarHostState,
+        scope = scope)
 }
 

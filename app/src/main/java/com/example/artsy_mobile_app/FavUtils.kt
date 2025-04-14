@@ -89,10 +89,8 @@ class FavoriteArtistViewModel : ViewModel() {
                     parameters.append("email", email)
                 }
             }.body()
-            Log.i("GetFavAPI", "Raw JSON: $response")
 
             val getFavResponse = jsonParser.decodeFromString<FavoritesResponse>(response)
-            Log.d("GetFavAPI", "Parsed Favs: ${getFavResponse.data}")
             getFavResponse.data
         } catch (e: Exception) {
             Log.e("GetFavAPIError", "Error fetching Fav results: ${e.message}")

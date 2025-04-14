@@ -1,5 +1,6 @@
 package com.example.artsy_mobile_app
 
+import PersistentCookieJar
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -40,6 +41,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
@@ -52,31 +55,47 @@ import coil.compose.rememberAsyncImagePainter
 
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.*
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
     Scaffold(
         topBar = {
             AppBar(
                 navController = navController,
+                snackbarHostState = snackbarHostState
             )
         },
         content = { innerPadding ->
             Column(modifier = Modifier.padding(innerPadding)) {
-                    MainContent(navController)
+                    MainContent(navController, snackbarHostState)
             }
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     )
 }
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppBar(navController: NavHostController)
+fun AppBar(
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState)
 {
     var menuExpanded by remember { mutableStateOf(false) }
+
+    val coroutineScope = rememberCoroutineScope()
+
+    val logoutViewModel: LogoutViewModel = viewModel()
+    val logoutState by logoutViewModel.logoutState.collectAsState()
+    val context = LocalContext.current
 
     TopAppBar(
         title = {
@@ -92,7 +111,7 @@ fun AppBar(navController: NavHostController)
                 }
             if (UserSessionManager.isLoggedIn()) {
                 val avatarUrl = UserSessionManager.getUser()?.avatar ?: ""
-                // Avatar with dropdown
+
                 Column {
                     Image(
                         painter = rememberAsyncImagePainter(avatarUrl),
@@ -111,8 +130,12 @@ fun AppBar(navController: NavHostController)
                             onClick = {
                                 menuExpanded = false
                                 UserSessionManager.clearSession()
+                                logoutViewModel.logout(context)
                                 navController.navigate("home") {
                                     popUpTo("home") { inclusive = true }
+                                }
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar("Logged out successfully!")
                                 }
                             }
                         )
@@ -127,6 +150,9 @@ fun AppBar(navController: NavHostController)
                                 UserSessionManager.clearSession()
                                 // TODO: Implement account deletion logic here
                                 navController.navigate("home")
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar("Logged out successfully!")
+                                }
                             }
                         )
                     }
@@ -147,18 +173,17 @@ fun AppBar(navController: NavHostController)
 
 
 @Composable
-fun MainContent(navController: NavHostController) {
+fun MainContent(navController: NavHostController, snackbarHostState: SnackbarHostState) {
 
     val isLoggedIn = UserSessionManager.isLoggedIn()
     val email = UserSessionManager.getUser()?.email ?: ""
-    val viewModel: FavoriteArtistViewModel = viewModel()
+    val getFavArtistViewModel: FavoriteArtistViewModel = viewModel()
+
+    val favArtistState = getFavArtistViewModel.getFavoritesState
 
     LaunchedEffect(isLoggedIn) {
-        if (isLoggedIn) viewModel.fetchFavorites(email)
+        if (isLoggedIn) getFavArtistViewModel.fetchFavorites(email)
     }
-
-    val state = viewModel.getFavoritesState
-
 
     Column(
         modifier = Modifier
@@ -211,25 +236,21 @@ fun MainContent(navController: NavHostController) {
                     Text("Login to see favorites")
                 }
             }
-            state is GetFavoriteArtistState.Loading -> LoadingIndicator()
+            favArtistState is GetFavoriteArtistState.Loading -> LoadingIndicator()
 
-            state is GetFavoriteArtistState.Success -> {
-                Text("Success GET FAV")
-//                LazyColumn {
-//                    items(state.results, key = { it.id }) { artist ->
-//                        FavoriteArtistItem(
-//                            favArtist = artist,
-//                            onClick = { selectedArtist ->
-//                                navController.navigate("artistDetails/${selectedArtist.id}") {
-//                                    popUpTo("artistDetails/{artistId}") { inclusive = true }
-//                                }
-//                            }
-//                        )
-//                        Spacer(modifier = Modifier.height(12.dp))
-//                    }
-//                }
+            favArtistState is GetFavoriteArtistState.Success -> {
+                LazyColumn {
+                    items(favArtistState.results.size) { index ->
+                        val artist = favArtistState.results[index]
+                        FavoriteArtistItem(
+                            artist = artist,
+                            onClick = { navController.navigate("artistDetails/${artist.favId}")}
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+                }
             }
-            state is GetFavoriteArtistState.Error -> {
+            favArtistState is GetFavoriteArtistState.Error -> {
                 Surface(
                     shape = RoundedCornerShape(50),
                     color = MaterialTheme.colorScheme.primaryContainer,
