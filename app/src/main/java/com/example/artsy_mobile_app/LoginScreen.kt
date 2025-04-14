@@ -184,7 +184,7 @@ fun LoginMainContent(
             is LoginState.Error -> {
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "Login Failed",
+                    text = "Username or password is incorrect",
                     color = MaterialTheme.colorScheme.error
                 )
             }

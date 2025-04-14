@@ -26,6 +26,10 @@ import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import java.util.Calendar
+
+import android.util.Log
+import java.util.TimeZone
 
 @Composable
 fun getCurrentDate(): String {
@@ -99,5 +103,29 @@ object HttpClientProvider {
         install(ContentNegotiation) {
             json(Json { ignoreUnknownKeys = true })
         }
+    }
+}
+
+
+fun parseTimestamp(timestamp: String): Long {
+    return try {
+        val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+//        format.timeZone = TimeZone.getTimeZone("UTC")
+        format.timeZone = TimeZone.getDefault()
+        format.parse(timestamp)?.time ?: System.currentTimeMillis()
+    } catch (e: Exception) {
+        System.currentTimeMillis()
+    }
+}
+
+fun formatElapsedTime(diffInMillis: Long): String {
+    return when {
+        diffInMillis < 0 -> "just now"
+        diffInMillis < 60_000 -> "${diffInMillis/1000} secs ago"
+        diffInMillis < 3_600_000 -> "${diffInMillis / 60_000} min ago"
+        diffInMillis < 86_400_000 -> "${diffInMillis / 3_600_000} hours ago"
+        diffInMillis < 2_592_000_000 -> "${diffInMillis / 86_400_000} days ago"
+        diffInMillis < 31_536_000_000 -> "${diffInMillis / 2_592_000_000} months ago"
+        else -> "${diffInMillis / 31_536_000_000} years ago"
     }
 }

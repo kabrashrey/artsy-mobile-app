@@ -9,7 +9,6 @@ import androidx.lifecycle.viewModelScope
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.client.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -18,16 +17,8 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.coroutines.CancellationException
-
-import io.ktor.client.engine.okhttp.*
-
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.kotlinx.json.*
 import android.util.Log
-import androidx.compose.material3.SnackbarHostState
-import kotlinx.coroutines.CoroutineScope
 
 val json = Json { ignoreUnknownKeys = true }
 
@@ -113,7 +104,6 @@ object LoginRepository {
 
             UserSessionManager.init(context)
             UserSessionManager.saveSession(user, accessToken)
-
 //            client.close()
         }
     }
@@ -139,7 +129,7 @@ class LogoutViewModel : ViewModel() {
                     }
                 )
             } catch(e: Exception){
-                Log.e("LoginViewModel", "Login failed: ${e.message}")
+                Log.e("LogoutModel", "Login failed: ${e.message}")
                 _logoutState.value = LogoutState.Error(e.message ?: "Unknown error")
 
             }
@@ -180,8 +170,6 @@ object LogoutRepository{
             val cookieJar = PersistentCookieJar(context)
             cookieJar.clearCookies()
             UserSessionManager.clearSession()
-
-
 //            client.close()
         }
     }
