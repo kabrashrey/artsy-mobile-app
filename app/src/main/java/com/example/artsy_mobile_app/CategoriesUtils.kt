@@ -68,11 +68,7 @@ sealed class CategoriesState {
 class CategoriesViewModel : ViewModel() {
     var categoriesState by mutableStateOf<CategoriesState>(CategoriesState.Loading)
 
-    private val client = HttpClient(Android) {
-        install(Logging) {
-            level = LogLevel.ALL
-        }
-    }
+    private val client = HttpClientProvider.client
 
     suspend fun fetchCategories(artworkId: String) {
         categoriesState = CategoriesState.Loading
@@ -93,7 +89,7 @@ class CategoriesViewModel : ViewModel() {
             val response: String = client.get(url).bodyAsText()
             Log.i("CategoriesAPI", "Raw JSON: $response")
 
-            val categoriesResponse = jsonParser.decodeFromString<CategoriesResponse>(response)
+            val categoriesResponse = json.decodeFromString<CategoriesResponse>(response)
             Log.d("CategoriesAPI", "Parsed Categories: ${categoriesResponse.data}")
             categoriesResponse.data
         } catch (e: Exception) {

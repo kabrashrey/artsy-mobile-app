@@ -59,11 +59,7 @@ class SearchViewModel : ViewModel() {
     var searchState by mutableStateOf<SearchState>(SearchState.Loading)
     var searchQuery by mutableStateOf("")
 
-    private val client = HttpClient(Android){
-        install(Logging){
-            level = LogLevel.ALL
-        }
-    }
+    private val client = HttpClientProvider.client
 
     fun onSearchQueryChange(newQuery: String) {
         searchQuery = newQuery
@@ -97,7 +93,7 @@ class SearchViewModel : ViewModel() {
             val response: String = client.get(url).bodyAsText()
             Log.i("SearchAPI", "Raw JSON: $response")
 
-            val searchResponse = jsonParser.decodeFromString<SearchResponse>(response)
+            val searchResponse = json.decodeFromString<SearchResponse>(response)
 
             Log.d("SearchAPI", "Parsed Artists: ${searchResponse.data}")
             searchResponse.data

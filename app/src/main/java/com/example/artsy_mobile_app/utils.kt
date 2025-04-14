@@ -26,7 +26,6 @@ import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import java.util.Calendar
 
 import android.util.Log
 import java.util.TimeZone
@@ -37,8 +36,7 @@ fun getCurrentDate(): String {
     return dateFormat.format(Date())
 }
 
-
-val jsonParser: Json = Json {
+val json = Json {
     ignoreUnknownKeys = true
     isLenient = true
     coerceInputValues = true
@@ -63,31 +61,31 @@ fun LoadingIndicator() {
 }
 
 
-
-object KtorClientProvider {
-    private var client: HttpClient? = null
-
-    fun getClient(context: Context): HttpClient {
-        if (client == null) {
-            val cookieJar = PersistentCookieJar(context)
-
-            val okHttpClient = OkHttpClient.Builder()
-                .cookieJar(cookieJar)
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .build()
-
-            client = HttpClient(OkHttp) {
-                engine {
-                    preconfigured = okHttpClient
-                }
-                install(ContentNegotiation) {
-                    json(Json { ignoreUnknownKeys = true })
-                }
-            }
-        }
-        return client!!
-    }
-}
+//
+//object KtorClientProvider {
+//    private var client: HttpClient? = null
+//
+//    fun getClient(context: Context): HttpClient {
+//        if (client == null) {
+//            val cookieJar = PersistentCookieJar(context)
+//
+//            val okHttpClient = OkHttpClient.Builder()
+//                .cookieJar(cookieJar)
+//                .connectTimeout(30, TimeUnit.SECONDS)
+//                .build()
+//
+//            client = HttpClient(OkHttp) {
+//                engine {
+//                    preconfigured = okHttpClient
+//                }
+//                install(ContentNegotiation) {
+//                    json(Json { ignoreUnknownKeys = true })
+//                }
+//            }
+//        }
+//        return client!!
+//    }
+//}
 
 object SnackbarManager {
     private val _messages = MutableSharedFlow<String>()
@@ -101,11 +99,10 @@ object SnackbarManager {
 object HttpClientProvider {
     val client = HttpClient(OkHttp) {
         install(ContentNegotiation) {
-            json(Json { ignoreUnknownKeys = true })
+            json(json)
         }
     }
 }
-
 
 fun parseTimestamp(timestamp: String): Long {
     return try {

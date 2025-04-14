@@ -20,8 +20,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.coroutines.CancellationException
 import android.util.Log
 
-val json = Json { ignoreUnknownKeys = true }
-
 @Serializable
 data class User(
     val _id: String,
@@ -35,13 +33,6 @@ sealed class LoginState {
     object Loading : LoginState()
     data class Success(val message: String) : LoginState()
     data class Error(val error: String) : LoginState()
-}
-
-sealed class LogoutState {
-    object Idle : LogoutState()
-    object Loading : LogoutState()
-    data class Success(val message: String) : LogoutState()
-    data class Error(val error: String) : LogoutState()
 }
 
 class LoginViewModel : ViewModel() {
@@ -107,6 +98,14 @@ object LoginRepository {
 //            client.close()
         }
     }
+}
+
+
+sealed class LogoutState {
+    object Idle : LogoutState()
+    object Loading : LogoutState()
+    data class Success(val message: String) : LogoutState()
+    data class Error(val error: String) : LogoutState()
 }
 
 

@@ -57,11 +57,7 @@ sealed class ArtworksState {
 class ArtworksViewModel : ViewModel() {
     var artworksState by mutableStateOf<ArtworksState>(ArtworksState.Loading)
 
-    private val client = HttpClient(Android) {
-        install(Logging) {
-            level = LogLevel.ALL
-        }
-    }
+    private val client = HttpClientProvider.client
 
     suspend fun fetchArtworks(artistId: String) {
         artworksState = ArtworksState.Loading
@@ -82,7 +78,7 @@ class ArtworksViewModel : ViewModel() {
             val response: String = client.get(url).bodyAsText()
             Log.i("ArtworksAPI", "Raw JSON: $response")
 
-            val artworksResponse = jsonParser.decodeFromString<ArtworksResponse>(response)
+            val artworksResponse = json.decodeFromString<ArtworksResponse>(response)
             Log.d("ArtworksAPI", "Parsed Artworks: ${artworksResponse.data}")
             artworksResponse.data
         } catch (e: Exception) {

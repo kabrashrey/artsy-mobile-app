@@ -57,11 +57,7 @@ sealed class SimilarArtistsState {
 class SimilarArtistsViewModel : ViewModel() {
     var similarArtistState by mutableStateOf<SimilarArtistsState>(SimilarArtistsState.Loading)
 
-    private val client = HttpClient(Android) {
-        install(Logging) {
-            level = LogLevel.ALL
-        }
-    }
+    private val client = HttpClientProvider.client
 
     suspend fun fetchSimilarArtists(artistId: String) {
         similarArtistState = SimilarArtistsState.Loading
@@ -82,7 +78,7 @@ class SimilarArtistsViewModel : ViewModel() {
             val response: String = client.get(url).bodyAsText()
             Log.i("SimilarArtistsAPI", "Raw JSON: $response")
 
-            val similarArtistResponse = jsonParser.decodeFromString<SimilarArtistsResponse>(response)
+            val similarArtistResponse = json.decodeFromString<SimilarArtistsResponse>(response)
             Log.d("SimilarArtistsAPI", "Parsed SimilarArtists: ${similarArtistResponse.data}")
             similarArtistResponse.data
         } catch (e: Exception) {

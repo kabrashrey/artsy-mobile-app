@@ -79,7 +79,7 @@ class FavoriteArtistViewModel : ViewModel() {
 
     var getFavoritesState by mutableStateOf<GetFavoriteArtistState>(GetFavoriteArtistState.Loading)
 
-    private val client = HttpClient()
+    private val client = HttpClientProvider.client
 
     suspend fun fetchFavorites(email: String) {
         getFavoritesState = GetFavoriteArtistState.Loading
@@ -103,7 +103,7 @@ class FavoriteArtistViewModel : ViewModel() {
                 }
             }.body()
 
-            val getFavResponse = jsonParser.decodeFromString<FavoritesResponse>(response)
+            val getFavResponse = json.decodeFromString<FavoritesResponse>(response)
             getFavResponse.data
         } catch (e: Exception) {
             Log.e("GetFavAPIError", "Error fetching Fav results: ${e.message}")

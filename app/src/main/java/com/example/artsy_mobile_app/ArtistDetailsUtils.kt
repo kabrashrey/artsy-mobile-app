@@ -63,11 +63,7 @@ class ArtistDetailsViewModel : ViewModel() {
     private val _state = mutableStateOf<ArtistDetailsState>(ArtistDetailsState.Loading)
     val state: State<ArtistDetailsState> get() = _state
 
-    private val client = HttpClient(Android){
-        install(Logging){
-            level = LogLevel.ALL
-        }
-    }
+    private val client = HttpClientProvider.client
 
     fun fetchArtistDetails(artistId: String) {
         viewModelScope.launch {
@@ -87,7 +83,7 @@ class ArtistDetailsViewModel : ViewModel() {
             val response: String = client.get(url).bodyAsText()
             Log.i("ArtistDetailsAPI", "Raw JSON: $response")
 
-            val artistResponse = jsonParser.decodeFromString<ArtistDetailsResponse>(response)
+            val artistResponse = json.decodeFromString<ArtistDetailsResponse>(response)
 
             if (artistResponse.success) {
                 Log.d("ArtistDetailsAPI", "Fetched artist details: ${artistResponse.data}")
