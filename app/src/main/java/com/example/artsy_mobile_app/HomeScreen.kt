@@ -158,6 +158,7 @@ fun AppBar(
                                 coroutineScope.launch {
                                     snackbarHostState.showSnackbar("Account deleted!")
                                 }
+                                UserSessionManager.clearSession()
                             }
                         )
                     }

@@ -1,5 +1,6 @@
 package com.example.artsy_mobile_app
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -194,24 +195,27 @@ fun RegisterMainContent(
             }
         }
 
-        when(registerState) {
+        val state = registerState
+        when(state) {
             is RegisterState.Error -> {
-                Text(
-                    text = "Username or password is incorrect",
-                    color = MaterialTheme.colorScheme.error
-                )
+                val errorMessage = state.error
+                if (errorMessage.contains("409")) {
+                    emailError = "Email already exists"
+                }
             }
 
             is RegisterState.Success -> {
                 LaunchedEffect(Unit) {
                     email = ""
                     password = ""
+                    fullName = ""
                     scope.launch {
-                        snackbarHostState.showSnackbar("Logged in successfully")
+                        snackbarHostState.showSnackbar("Registered successfully")
                     }
                     navController.navigate("home") {
                         popUpTo("register") { inclusive = true }
                     }
+                    registerViewModel.resetState()
                 }
             }
             else -> {}
