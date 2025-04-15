@@ -15,26 +15,39 @@ import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 
+import androidx.lifecycle.viewmodel.compose.viewModel
+
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
-fun RegisterScreen(navController: NavHostController){
+fun RegisterScreen(
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState,
+    scope: CoroutineScope
+){
     Scaffold(
         topBar = {
             RegisterTopBar(navController = navController)
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         content = { innerPadding ->
             Column(modifier = Modifier.padding(innerPadding)) {
-                RegisterMainContent(navController)
+                RegisterMainContent(navController, snackbarHostState, scope)
             }
         },
     )
@@ -67,7 +80,11 @@ fun RegisterTopBar(navController: NavHostController) {
     )}
 
 @Composable
-fun RegisterMainContent(navController: NavHostController){
+fun RegisterMainContent(
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState,
+    scope: CoroutineScope
+){
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var fullName by rememberSaveable { mutableStateOf("") }
@@ -75,6 +92,12 @@ fun RegisterMainContent(navController: NavHostController){
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
     var fullNameError by remember { mutableStateOf<String?>(null) }
+
+    val registerViewModel: RegisterViewModel = viewModel()
+    val registerState by registerViewModel.registerState.collectAsState()
+
+
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -157,11 +180,41 @@ fun RegisterMainContent(navController: NavHostController){
                     fullNameError = "Full name cannot be empty"
                     valid = false
                 }
-                if(valid) { /*Handle login */ }
+                if(valid) { registerViewModel.registerUser(context, fullName, email, password) }
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            enabled = registerState !is RegisterState.Loading
         ) {
-            Text("Register")
+            if(registerState is RegisterState.Loading){
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary)
+            } else {
+                Text("Register")
+            }
+        }
+
+        when(registerState) {
+            is RegisterState.Error -> {
+                Text(
+                    text = "Username or password is incorrect",
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+
+            is RegisterState.Success -> {
+                LaunchedEffect(Unit) {
+                    email = ""
+                    password = ""
+                    scope.launch {
+                        snackbarHostState.showSnackbar("Logged in successfully")
+                    }
+                    navController.navigate("home") {
+                        popUpTo("register") { inclusive = true }
+                    }
+                }
+            }
+            else -> {}
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -190,6 +243,11 @@ fun RegisterMainContent(navController: NavHostController){
 @Preview(showBackground = true)
 @Composable
 fun RegisterScreenPreview() {
-    RegisterScreen(navController = rememberNavController())
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    RegisterScreen(
+        navController = rememberNavController(),
+        snackbarHostState = snackbarHostState,
+        scope = scope)
 }
 

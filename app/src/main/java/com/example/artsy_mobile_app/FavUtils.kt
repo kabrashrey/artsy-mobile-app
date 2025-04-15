@@ -86,10 +86,8 @@ class FavoriteArtistViewModel : ViewModel() {
         val results = fetchFavoritesFromAPI(email)
 
         getFavoritesState = if (results.isNotEmpty()) {
-            Log.d("FavViewModel", "Fav successful with ${results.size} results")
             GetFavoriteArtistState.Success(results)
         } else {
-            Log.d("FavViewModel", "No results found for: $email")
             GetFavoriteArtistState.Error("No results found")
         }
     }

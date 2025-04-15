@@ -91,10 +91,14 @@ fun AppBar(
 {
     var menuExpanded by remember { mutableStateOf(false) }
 
-    val coroutineScope = rememberCoroutineScope()
 
     val logoutViewModel: LogoutViewModel = viewModel()
+    val deleteAccountViewModel: DeleteAccountViewModel = viewModel()
+
     val logoutState by logoutViewModel.logoutState.collectAsState()
+    val registerState by deleteAccountViewModel.deleteState.collectAsState()
+
+    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
     TopAppBar(
@@ -147,11 +151,12 @@ fun AppBar(
                                    },
                             onClick = {
                                 menuExpanded = false
-                                UserSessionManager.clearSession()
-                                // TODO: Implement account deletion logic here
-                                navController.navigate("home")
+                                deleteAccountViewModel.deleteAccount(context)
+                                navController.navigate("home"){
+                                    popUpTo("home") { inclusive = true }
+                                }
                                 coroutineScope.launch {
-                                    snackbarHostState.showSnackbar("Logged out successfully!")
+                                    snackbarHostState.showSnackbar("Account deleted!")
                                 }
                             }
                         )

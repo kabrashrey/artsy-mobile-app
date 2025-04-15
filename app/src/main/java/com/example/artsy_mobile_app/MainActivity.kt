@@ -64,7 +64,10 @@ class MainActivity : ComponentActivity() {
                                 scope = scope)
                         }
                         composable("register") {
-                            RegisterScreen(navController)
+                            RegisterScreen(
+                                navController= navController,
+                                snackbarHostState = snackbarHostState,
+                                scope = scope)
                         }
                         composable("artistDetails/{artistId}") { backStackEntry ->
                             val artistId = backStackEntry.arguments?.getString("artistId")
