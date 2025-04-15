@@ -31,11 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 
-import io.ktor.client.*
-import io.ktor.client.request.*
-import io.ktor.client.engine.android.*
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable

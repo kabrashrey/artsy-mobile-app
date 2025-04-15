@@ -1,34 +1,34 @@
 package com.example.artsy_mobile_app
 
-import PersistentCookieJar
-import android.content.Context
-import androidx.compose.runtime.Composable
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
+
 import androidx.compose.ui.Modifier
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Column
-import kotlinx.serialization.json.Json
+
 import androidx.compose.material3.Text
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
+import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
-import okhttp3.OkHttpClient
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.serialization.json.Json
 
 import android.util.Log
-import java.util.TimeZone
+
 
 @Composable
 fun getCurrentDate(): String {

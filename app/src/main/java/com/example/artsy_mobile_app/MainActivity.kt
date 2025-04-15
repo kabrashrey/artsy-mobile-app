@@ -8,23 +8,19 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
-import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.tooling.preview.Preview
 
 import com.example.artsy_mobile_app.ui.theme.ArtsyMobileAppTheme
-import kotlinx.coroutines.coroutineScope
 
 
 class MainActivity : ComponentActivity() {

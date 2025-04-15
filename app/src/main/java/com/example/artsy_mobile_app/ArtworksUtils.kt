@@ -1,6 +1,5 @@
 package com.example.artsy_mobile_app
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +12,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,17 +20,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 
-import io.ktor.client.*
-import io.ktor.client.request.*
-import io.ktor.client.engine.android.*
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.statement.bodyAsText
+import io.ktor.client.request.get
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
 
 import androidx.lifecycle.ViewModel
 import coil.compose.AsyncImage
+import android.util.Log
+
 
 @Serializable
 data class ArtworksResponse(

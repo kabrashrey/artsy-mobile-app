@@ -8,31 +8,36 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import io.ktor.client.*
+
 import io.ktor.client.request.*
 import kotlinx.coroutines.launch
-import io.ktor.client.engine.android.*
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logging
+import kotlinx.serialization.Serializable
 import io.ktor.client.statement.bodyAsText
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil.compose.AsyncImage
-import kotlinx.serialization.Serializable
+import androidx.compose.runtime.*
+
 
 @Serializable
 data class SearchResponse(
@@ -107,7 +112,15 @@ class SearchViewModel : ViewModel() {
 
 
 @Composable
-fun ArtistCard(artist: Artist, onClick: (Artist) -> Unit) {
+fun ArtistCard(
+    artist: Artist,
+    onClick: (Artist) -> Unit,
+    isLoggedIn: Boolean,
+    isFavorited: Boolean,
+    onToggleFavorite: (Artist, Boolean) -> Unit
+) {
+    var isFav by remember { mutableStateOf(isFavorited) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -128,6 +141,32 @@ fun ArtistCard(artist: Artist, onClick: (Artist) -> Unit) {
                 placeholder = painterResource(id = R.drawable.artsy_logo),
                 error = painterResource(id = R.drawable.artsy_logo),
             )
+            if (isLoggedIn) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(12.dp)
+                        .size(40.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = CircleShape
+                        )
+                        .clickable {
+                            isFav = !isFav
+                            onToggleFavorite(artist, isFav)
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(
+                            id = if (isFav) R.drawable.star_filled else R.drawable.star_outline
+                        ),
+                        contentDescription = if (isFav) "Remove from favorites" else "Add to favorites",
+                        tint = if (isFav) Color.Black else MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+            }
             Row(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
@@ -144,7 +183,6 @@ fun ArtistCard(artist: Artist, onClick: (Artist) -> Unit) {
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
-
             }
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,

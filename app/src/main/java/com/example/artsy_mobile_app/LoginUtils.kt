@@ -1,4 +1,5 @@
 package com.example.artsy_mobile_app
+
 import PersistentCookieJar
 import com.example.artsy_mobile_app.LoginRepository.loginUser
 
@@ -6,18 +7,26 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.http.*
+
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.ContentType
+import io.ktor.client.call.body
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.request.header
+
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
+import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.Serializable
-import kotlinx.coroutines.CancellationException
+
+
 import android.util.Log
 
 @Serializable

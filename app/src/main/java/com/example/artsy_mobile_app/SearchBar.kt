@@ -1,5 +1,6 @@
 package com.example.artsy_mobile_app
 
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,6 +25,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,8 +45,29 @@ import androidx.navigation.compose.rememberNavController
 @Composable
 fun SearchScreen(navController: NavHostController) {
     val searchViewModel: SearchViewModel = viewModel()
+    val favoriteViewModel: FavoriteArtistViewModel = viewModel()
+
+    val email = UserSessionManager.getUser()?.email ?: ""
+
+    LaunchedEffect(Unit) {
+        if (UserSessionManager.isLoggedIn()) {
+            favoriteViewModel.fetchFavorites(email)
+        }
+    }
+
     val searchState = searchViewModel.searchState
     val query = searchViewModel.searchQuery
+    val getFavoritesState = favoriteViewModel.getFavoritesState
+
+    val favoriteArtistIds = remember(getFavoritesState) {
+        (getFavoritesState as? GetFavoriteArtistState.Success)
+            ?.results
+            ?.map { it.favId }
+            ?.toSet()
+            ?: emptySet()
+    }
+
+    val isLoggedIn = UserSessionManager.isLoggedIn()
 
     Scaffold(
         topBar = {
@@ -70,9 +93,20 @@ fun SearchScreen(navController: NavHostController) {
                     } else {
                         LazyColumn {
                             items(results) { artist ->
+                                val isFavourited = favoriteArtistIds.contains(artist.id)
                                 ArtistCard(
                                     artist = artist,
-                                    onClick = { navController.navigate("artistDetails/${artist.id}") })
+                                    onClick = { navController.navigate("artistDetails/${artist.id}") },
+                                    isLoggedIn = isLoggedIn,
+                                    isFavorited = isFavourited,
+                                    onToggleFavorite = { artist, nowFavourited ->
+                                        if (nowFavourited) {
+                                            // Add to fav API
+                                        } else {
+                                            // Remove from fav API
+                                        }
+                                    }
+                                )
                             }
                         }
                     }
