@@ -45,6 +45,10 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.platform.LocalConfiguration
 
 import android.util.Log
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
+
+data class TabItem(val title: String, val icon: Any)
 
 
 @Composable
@@ -59,6 +63,17 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
     var showCarousel by remember { mutableStateOf(false) }
     var selectedArtworkId by remember { mutableStateOf<String?>(null) }
     val categoryState = categoriesViewModel.categoriesState
+
+    val isLoggedIn = UserSessionManager.isLoggedIn()
+
+    val tabs = mutableListOf(
+        TabItem("Details", Icons.Outlined.Info),
+        TabItem("Artworks", Icons.Outlined.AccountBox)
+    )
+
+    if (isLoggedIn) {
+        tabs.add(TabItem("Similar", painterResource(id = R.drawable.person_search)))
+    }
 
     LaunchedEffect(artistId) {
         selectedTabIndex = 0
@@ -131,7 +146,8 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                 }
             }
         }
-    } else if (showCarousel && categoryState is CategoriesState.Error) {
+    }
+    else if (showCarousel && categoryState is CategoriesState.Error) {
         Dialog(onDismissRequest = {
             showCarousel = false
             selectedArtworkId = null
@@ -189,7 +205,6 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
         }
     }
 
-
     val artistName = when (val currentState = state.value) {
         is ArtistDetailsState.Success -> currentState.artistDetails?.title ?: ""
         else -> null
@@ -204,35 +219,23 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
 
                 // --- Tabs below TopBar ---
                 TabRow(selectedTabIndex = selectedTabIndex) {
-                    Tab(
-                        selected = selectedTabIndex == 0,
-                        onClick = { selectedTabIndex = 0 },
-                        icon = { Icon(Icons.Outlined.Info, contentDescription = "Details") },
-                        text = { Text("Details") }
-
-                    )
-                    Tab(
-                        selected = selectedTabIndex == 1,
-                        onClick = { selectedTabIndex = 1 },
-                        icon = { Icon(Icons.Outlined.AccountBox, contentDescription = "Artworks") },
-                        text = { Text("Artworks") }
-                    )
-                    Tab(
-                        selected = selectedTabIndex == 2,
-                        onClick = { selectedTabIndex = 2 },
-                        icon = {
-                            Icon(
-                                painter = painterResource(id = R.drawable.person_search),
-                                contentDescription = "Similar Artists",
-                                modifier = Modifier.size(24.dp)
-                            )
-                        },
-                        text = { Text("Similar") }
-                    )
+                    tabs.forEachIndexed { index, tab ->
+                        Tab(
+                            selected = selectedTabIndex == index,
+                            onClick = { selectedTabIndex = index },
+                            icon = {
+                                when (tab.icon) {
+                                    is ImageVector -> Icon(tab.icon, contentDescription = tab.title)
+                                    is Painter -> Icon(tab.icon, contentDescription = tab.title)
+                                }
+                            },
+                            text = { Text(tab.title) }
+                        )
+                    }
                 }
 
-                when (selectedTabIndex){
-                    0 -> {
+                when (tabs[selectedTabIndex].title) {
+                    "Details" -> {
                         when (val currentState = state.value) {
                             is ArtistDetailsState.Loading -> LoadingIndicator()
                             is ArtistDetailsState.Error -> {
@@ -272,7 +275,7 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                             }
                         }
                     }
-                    1 -> {
+                    "Artworks" -> {
                         val artworksState = artworksViewModel.artworksState
                         Column(
                             modifier = Modifier
@@ -297,7 +300,7 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                                                 .fillMaxWidth()
                                                 .padding(horizontal = 16.dp, vertical = 12.dp),
                                             contentAlignment = Alignment.Center
-                                        ){
+                                        ) {
                                             Text(
                                                 text = "No Artworks",
                                                 color = MaterialTheme.colorScheme.onErrorContainer,
@@ -306,6 +309,7 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                                         }
                                     }
                                 }
+
                                 is ArtworksState.Success -> {
                                     LazyColumn {
                                         items(artworksState.results) { artist ->
@@ -323,9 +327,8 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                             }
                         }
                     }
-                    2 -> {
+                    "Similar" -> {
                         val similarArtistsState = similarArtistsViewModel.similarArtistState
-
                         when (similarArtistsState) {
                             is SimilarArtistsState.Loading -> LoadingIndicator()
                             is SimilarArtistsState.Error -> {
@@ -346,10 +349,13 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                             is SimilarArtistsState.Success -> {
                                 LazyColumn {
                                     items(similarArtistsState.results) { artist ->
-                                        SimilarArtistCard(SimilarArtists = artist,
+                                        SimilarArtistCard(
+                                            SimilarArtists = artist,
                                             onClick = { selectedArtist ->
                                                 navController.navigate("artistDetails/${selectedArtist.id}") {
-                                                    popUpTo("artistDetails/{artistId}") { inclusive = true }
+                                                    popUpTo("artistDetails/{artistId}") {
+                                                        inclusive = true
+                                                    }
                                                 }
                                             }
                                         )
