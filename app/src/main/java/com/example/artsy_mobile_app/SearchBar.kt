@@ -101,9 +101,9 @@ fun SearchScreen(navController: NavHostController) {
                                     isFavorited = isFavourited,
                                     onToggleFavorite = { artist, nowFavourited ->
                                         if (nowFavourited) {
-                                            // Add to fav API
+                                            favoriteViewModel.addFavorite(email, artist.id)
                                         } else {
-                                            // Remove from fav API
+                                            favoriteViewModel.removeFavorite(email, artist.id)
                                         }
                                     }
                                 )

@@ -30,12 +30,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+
 import io.ktor.client.call.body
+import io.ktor.client.request.delete
+import io.ktor.client.request.forms.FormDataContent
 import io.ktor.client.request.get
+import io.ktor.client.request.post
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.coroutines.delay
-
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import io.ktor.http.*
+import io.ktor.client.request.setBody
+import kotlin.String
 
 @Serializable
 data class FavoritesResponse(
@@ -64,19 +74,47 @@ sealed class GetFavoriteArtistState {
     data class Error(val message: String) : GetFavoriteArtistState()
 }
 
+sealed class AddFavoriteArtistState {
+    object Loading : AddFavoriteArtistState()
+    data class Success(val results: List<FavoriteArtist>) : AddFavoriteArtistState()
+    data class Error(val message: String) : AddFavoriteArtistState()
+}
+
+sealed class RemoveFavoriteArtistState {
+    object Loading : RemoveFavoriteArtistState()
+    data class Success(val results: List<FavoriteArtist>) : RemoveFavoriteArtistState()
+    data class Error(val message: String) : RemoveFavoriteArtistState()
+}
+
 
 class FavoriteArtistViewModel : ViewModel() {
 
-    var getFavoritesState by mutableStateOf<GetFavoriteArtistState>(GetFavoriteArtistState.Loading)
+    var addFavoriteArtistState: AddFavoriteArtistState by mutableStateOf(AddFavoriteArtistState.Loading)
+    var removeFavoriteArtistState: RemoveFavoriteArtistState by mutableStateOf(RemoveFavoriteArtistState.Loading)
+    var getFavoritesState: GetFavoriteArtistState by mutableStateOf(GetFavoriteArtistState.Loading)
 
-    val favoriteArtistIds: Set<String>
-        get() = (getFavoritesState as? GetFavoriteArtistState.Success)
-            ?.results
-            ?.map { it.favId }
-            ?.toSet()
-            ?: emptySet()
-
+    private val currentFavorites = mutableListOf<FavoriteArtist>()
     private val client = HttpClientProvider.client
+
+    fun addFavorite(email: String, favId: String) {
+        viewModelScope.launch {
+            addToFavorites(email, favId)
+            if (addFavoriteArtistState is AddFavoriteArtistState.Success) {
+                SnackbarManager.showMessage("Added to favorites!")
+            }
+            fetchFavorites(email)
+        }
+    }
+
+    fun removeFavorite(email: String, favId: String) {
+        viewModelScope.launch {
+            removeFromFavorites(email, favId)
+            if (removeFavoriteArtistState is RemoveFavoriteArtistState.Success) {
+                SnackbarManager.showMessage("Removed from favorites!")
+            }
+            fetchFavorites(email)
+        }
+    }
 
     suspend fun fetchFavorites(email: String) {
         getFavoritesState = GetFavoriteArtistState.Loading
@@ -105,8 +143,68 @@ class FavoriteArtistViewModel : ViewModel() {
             emptyList()
         }
     }
-}
 
+    suspend fun addToFavorites(email: String, favId: String) {
+        addFavoriteArtistState = AddFavoriteArtistState.Loading
+        val newFavorite = addToFavoritesAPI(email, favId)
+
+        if (newFavorite != null) {
+            currentFavorites.add(newFavorite)
+            addFavoriteArtistState = AddFavoriteArtistState.Success(currentFavorites)
+        } else {
+            addFavoriteArtistState = AddFavoriteArtistState.Error("Failed to add to favorites")
+        }
+    }
+
+    private suspend fun addToFavoritesAPI(email: String, favId: String): FavoriteArtist? {
+        val url = "https://artsy-shrey-3.wl.r.appspot.com/api/favourites/add"
+        return try {
+            val response: String = client.post(url) {
+                setBody(FormDataContent(Parameters.build {
+                    append("email", email)
+                    append("fav_id", favId)
+                }))
+            }.body()
+
+            val responseJson = json.parseToJsonElement(response).jsonObject
+            val dataJson = responseJson["data"]?.toString()
+            dataJson?.let { json.decodeFromString<FavoriteArtist>(it) }
+        } catch (e: Exception) {
+            Log.e("AddFavAPIError", "Error adding to favorites: ${e.message}")
+            null
+        }
+    }
+
+    suspend fun removeFromFavorites(email: String, favId: String) {
+        removeFavoriteArtistState = RemoveFavoriteArtistState.Loading
+        val removedId = removeFavoritesFromAPI(email, favId)
+
+        if (removedId != null) {
+            currentFavorites.removeAll { it.favId == removedId }
+            removeFavoriteArtistState = RemoveFavoriteArtistState.Success(currentFavorites)
+        } else {
+            removeFavoriteArtistState = RemoveFavoriteArtistState.Error("Failed to remove from favorites")
+        }
+    }
+
+    private suspend fun removeFavoritesFromAPI(email: String, favId: String): String? {
+        val url = "https://artsy-shrey-3.wl.r.appspot.com/api/favourites/delete"
+        return try {
+            val response: String = client.delete(url) {
+                setBody(FormDataContent(Parameters.build {
+                    append("email", email)
+                    append("fav_id", favId)
+                }))
+            }.body()
+
+            val responseJson = json.parseToJsonElement(response).jsonObject
+            responseJson["data"]?.jsonPrimitive?.content
+        } catch (e: Exception) {
+            Log.e("RemoveFavAPIError", "Error removing from favorites: ${e.message}")
+            null
+        }
+    }
+}
 
 
 
