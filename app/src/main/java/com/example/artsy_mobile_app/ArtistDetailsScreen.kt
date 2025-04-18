@@ -66,15 +66,18 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
     val viewModel: ArtistDetailsViewModel = viewModel()
     val artworksViewModel: ArtworksViewModel = viewModel()
     val similarArtistsViewModel: SimilarArtistsViewModel = viewModel()
-    val state =  viewModel.state
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
-
+    val favoriteViewModel: FavoriteArtistViewModel = viewModel()
     val categoriesViewModel: CategoriesViewModel = viewModel()
+
+    val state =  viewModel.state
+
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
     var showCarousel by remember { mutableStateOf(false) }
     var selectedArtworkId by remember { mutableStateOf<String?>(null) }
     val categoryState = categoriesViewModel.categoriesState
 
     val isLoggedIn = UserSessionManager.isLoggedIn()
+    val email = UserSessionManager.getUser()?.email ?: ""
 
     val tabs = mutableListOf(
         TabItem("Details", Icons.Outlined.Info),
@@ -220,6 +223,15 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
         else -> null
     }
 
+    val getFavoritesState = favoriteViewModel.getFavoritesState
+    val favoriteArtistIds = remember(getFavoritesState) {
+        (getFavoritesState as? GetFavoriteArtistState.Success)
+            ?.results
+            ?.map { it.favId }
+            ?.toSet()
+            ?: emptySet()
+    }
+
     Scaffold(
         topBar = {
             ArtistDetailsTopBar(navController = navController, artistName = artistName.toString())
@@ -359,13 +371,23 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                             is SimilarArtistsState.Success -> {
                                 LazyColumn {
                                     items(similarArtistsState.results) { artist ->
+                                        val isFavourited = favoriteArtistIds.contains(artist.id)
                                         SimilarArtistCard(
-                                            SimilarArtists = artist,
+                                            similarArtists = artist,
                                             onClick = { selectedArtist ->
                                                 navController.navigate("artistDetails/${selectedArtist.id}") {
                                                     popUpTo("artistDetails/{artistId}") {
                                                         inclusive = true
                                                     }
+                                                }
+                                            },
+                                            isLoggedIn = isLoggedIn,
+                                            isFavorited = isFavourited,
+                                            onToggleFavorite = { artist, nowFavourited ->
+                                                if (nowFavourited) {
+                                                    favoriteViewModel.addFavorite(email, artist.id)
+                                                } else {
+                                                    favoriteViewModel.removeFavorite(email, artist.id)
                                                 }
                                             }
                                         )
