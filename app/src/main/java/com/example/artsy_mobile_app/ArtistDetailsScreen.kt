@@ -383,11 +383,11 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                                             },
                                             isLoggedIn = isLoggedIn,
                                             isFavorited = isFavourited,
-                                            onToggleFavorite = { artist, nowFavourited ->
+                                            onToggleFavorite = { similarArtists, nowFavourited ->
                                                 if (nowFavourited) {
-                                                    favoriteViewModel.addFavorite(email, artist.id)
+                                                    favoriteViewModel.addFavorite(email, similarArtists.id)
                                                 } else {
-                                                    favoriteViewModel.removeFavorite(email, artist.id)
+                                                    favoriteViewModel.removeFavorite(email, similarArtists.id)
                                                 }
                                             }
                                         )

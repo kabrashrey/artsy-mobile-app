@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 
 import androidx.compose.material.icons.Icons
@@ -21,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -64,10 +67,8 @@ class SimilarArtistsViewModel : ViewModel() {
         similarArtistState = SimilarArtistsState.Loading
         val results = fetchSimilarArtistsResultsFromAPI(artistId)
         similarArtistState = if (results.isNotEmpty()) {
-            Log.d("SimilarArtistsViewModel", "SimilarArtists successful with ${results.size} results")
             SimilarArtistsState.Success(results)
         } else {
-            Log.d("SimilarArtistsViewModel", "No results found for: $artistId")
             SimilarArtistsState.Error("No results found")
         }
     }
@@ -77,10 +78,8 @@ class SimilarArtistsViewModel : ViewModel() {
             "https://artsy-shrey-3.wl.r.appspot.com/api/artists/similar/?id=$artistId"
         return try {
             val response: String = client.get(url).bodyAsText()
-            Log.i("SimilarArtistsAPI", "Raw JSON: $response")
 
             val similarArtistResponse = json.decodeFromString<SimilarArtistsResponse>(response)
-            Log.d("SimilarArtistsAPI", "Parsed SimilarArtists: ${similarArtistResponse.data}")
             similarArtistResponse.data
         } catch (e: Exception) {
             Log.e("SimilarArtistsError", "Error fetching SimilarArtists results: ${e.message}")
@@ -91,20 +90,28 @@ class SimilarArtistsViewModel : ViewModel() {
 
 
 @Composable
-fun SimilarArtistCard(SimilarArtists: SimilarArtists, onClick: (SimilarArtists) -> Unit) {
+fun SimilarArtistCard(
+    similarArtists: SimilarArtists,
+    onClick: (SimilarArtists) -> Unit,
+    isLoggedIn: Boolean,
+    isFavorited: Boolean,
+    onToggleFavorite: (SimilarArtists, Boolean) -> Unit
+) {
+    var isFav by remember { mutableStateOf(isFavorited) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clickable { onClick(SimilarArtists) },
+            .clickable { onClick(similarArtists) },
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Box(modifier = Modifier.fillMaxWidth()
         ) {
             AsyncImage(
-                model = SimilarArtists.thumbnail,
-                contentDescription = SimilarArtists.name,
+                model = similarArtists.thumbnail,
+                contentDescription = similarArtists.name,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp),
@@ -112,6 +119,32 @@ fun SimilarArtistCard(SimilarArtists: SimilarArtists, onClick: (SimilarArtists) 
                 placeholder = painterResource(id = R.drawable.artsy_logo),
                 error = painterResource(id = R.drawable.artsy_logo),
             )
+            if (isLoggedIn) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(12.dp)
+                        .size(40.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = CircleShape
+                        )
+                        .clickable {
+                            isFav = !isFav
+                            onToggleFavorite(similarArtists, isFav)
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(
+                            id = if (isFav) R.drawable.star_filled else R.drawable.star_outline
+                        ),
+                        contentDescription = if (isFav) "Remove from favorites" else "Add to favorites",
+                        tint = if (isFav) Color.Black else MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+            }
             Row(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
@@ -121,10 +154,10 @@ fun SimilarArtistCard(SimilarArtists: SimilarArtists, onClick: (SimilarArtists) 
                         shape = RoundedCornerShape(4.dp)
                     )
                     .padding(16.dp)
-                    .clickable { onClick(SimilarArtists) }
+                    .clickable { onClick(similarArtists) }
             ) {
                 Text(
-                    text = SimilarArtists.name,
+                    text = similarArtists.name,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
