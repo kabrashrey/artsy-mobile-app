@@ -79,15 +79,12 @@ class SearchViewModel : ViewModel() {
 
     private suspend fun performSearch(query: String) {
         searchState = SearchState.Loading
-        Log.d("SearchViewModel", "Searching for: $query")
 
         val results = fetchSearchResultsFromAPI(query)
 
         searchState = if (results.isNotEmpty()) {
-            Log.d("SearchViewModel", "Search successful with ${results.size} results")
             SearchState.Success(results)
         } else {
-            Log.d("SearchViewModel", "No results found for: $query")
             SearchState.Error("No results found")
         }
     }
@@ -96,11 +93,7 @@ class SearchViewModel : ViewModel() {
         val url = "https://artsy-shrey-3.wl.r.appspot.com/api/search?q=$query&size=10&type=artist"
         return try {
             val response: String = client.get(url).bodyAsText()
-            Log.i("SearchAPI", "Raw JSON: $response")
-
             val searchResponse = json.decodeFromString<SearchResponse>(response)
-
-            Log.d("SearchAPI", "Parsed Artists: ${searchResponse.data}")
             searchResponse.data
         } catch (e: Exception) {
             Log.e("SearchError", "Error fetching search results: ${e.message}")

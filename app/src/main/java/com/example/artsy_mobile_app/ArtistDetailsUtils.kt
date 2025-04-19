@@ -58,12 +58,10 @@ class ArtistDetailsViewModel : ViewModel() {
         val url = "https://artsy-shrey-3.wl.r.appspot.com/api/artists?id=$artistId"
         return try {
             val response: String = client.get(url).bodyAsText()
-            Log.i("ArtistDetailsAPI", "Raw JSON: $response")
 
             val artistResponse = json.decodeFromString<ArtistDetailsResponse>(response)
 
             if (artistResponse.success) {
-                Log.d("ArtistDetailsAPI", "Fetched artist details: ${artistResponse.data}")
                 artistResponse.data
             } else {
                 null

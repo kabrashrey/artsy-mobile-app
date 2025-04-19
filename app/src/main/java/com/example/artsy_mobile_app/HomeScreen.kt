@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 
 import androidx.compose.foundation.Image
@@ -76,7 +75,7 @@ fun HomeScreen(navController: NavHostController) {
         },
         content = { innerPadding ->
             Column(modifier = Modifier.padding(innerPadding)) {
-                    MainContent(navController, snackbarHostState)
+                    MainContent(navController)
             }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -96,8 +95,8 @@ fun AppBar(
     val logoutViewModel: LogoutViewModel = viewModel()
     val deleteAccountViewModel: DeleteAccountViewModel = viewModel()
 
-    val logoutState by logoutViewModel.logoutState.collectAsState()
-    val registerState by deleteAccountViewModel.deleteState.collectAsState()
+//    val logoutState by logoutViewModel.logoutState.collectAsState()
+//    val registerState by deleteAccountViewModel.deleteState.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -180,7 +179,7 @@ fun AppBar(
 
 
 @Composable
-fun MainContent(navController: NavHostController, snackbarHostState: SnackbarHostState) {
+fun MainContent(navController: NavHostController) {
 
     val isLoggedIn = UserSessionManager.isLoggedIn()
     val email = UserSessionManager.getUser()?.email ?: ""

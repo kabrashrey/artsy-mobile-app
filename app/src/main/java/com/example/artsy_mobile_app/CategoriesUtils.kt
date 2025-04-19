@@ -70,10 +70,8 @@ class CategoriesViewModel : ViewModel() {
         categoriesState = CategoriesState.Loading
         val results = fetchCategoriesResultsFromAPI(artworkId)
         categoriesState = if (results.isNotEmpty()) {
-            Log.d("CategoriesViewModel", "Categories successful with ${results.size} results")
             CategoriesState.Success(results)
         } else {
-            Log.d("CategoriesViewModel", "No results found for: $artworkId")
             CategoriesState.Error("No results found")
         }
     }
@@ -83,13 +81,10 @@ class CategoriesViewModel : ViewModel() {
             "https://artsy-shrey-3.wl.r.appspot.com/api/genes?artwork_id=${artworkId}"
         return try {
             val response: String = client.get(url).bodyAsText()
-            Log.i("CategoriesAPI", "Raw JSON: $response")
 
             val categoriesResponse = json.decodeFromString<CategoriesResponse>(response)
-            Log.d("CategoriesAPI", "Parsed Categories: ${categoriesResponse.data}")
             categoriesResponse.data
         } catch (e: Exception) {
-            Log.e("CategoriesError", "Error fetching Categories results: ${e.message}")
             emptyList()
         }
     }

@@ -93,6 +93,7 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
         viewModel.fetchArtistDetails(artistId)
         artworksViewModel.fetchArtworks(artistId)
         similarArtistsViewModel.fetchSimilarArtists(artistId)
+        favoriteViewModel.fetchFavorites(email)
     }
 
     LaunchedEffect(selectedArtworkId) {

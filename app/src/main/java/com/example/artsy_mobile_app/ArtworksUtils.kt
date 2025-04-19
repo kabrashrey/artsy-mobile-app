@@ -61,10 +61,8 @@ class ArtworksViewModel : ViewModel() {
         artworksState = ArtworksState.Loading
         val results = fetchArtworksResultsFromAPI(artistId)
         artworksState = if (results.isNotEmpty()) {
-            Log.d("ArtworksViewModel", "Artworks successful with ${results.size} results")
             ArtworksState.Success(results)
         } else {
-            Log.d("ArtworksViewModel", "No results found for: $artistId")
             ArtworksState.Error("No results found")
         }
     }
@@ -74,10 +72,7 @@ class ArtworksViewModel : ViewModel() {
             "https://artsy-shrey-3.wl.r.appspot.com/api/artworks?artist_id=$artistId&size=10"
         return try {
             val response: String = client.get(url).bodyAsText()
-            Log.i("ArtworksAPI", "Raw JSON: $response")
-
             val artworksResponse = json.decodeFromString<ArtworksResponse>(response)
-            Log.d("ArtworksAPI", "Parsed Artworks: ${artworksResponse.data}")
             artworksResponse.data
         } catch (e: Exception) {
             Log.e("ArtworksError", "Error fetching Artworks results: ${e.message}")
