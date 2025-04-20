@@ -112,12 +112,12 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(max = 650.dp)
-                    .padding(16.dp)
             ) {
                 Card(
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier
                         .fillMaxSize()
+                        .fillMaxWidth()
                         .wrapContentHeight()
                 ) {
                     Column(
