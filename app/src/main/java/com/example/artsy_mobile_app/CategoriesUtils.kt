@@ -11,7 +11,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.absoluteOffset
-import androidx.compose.foundation.layout.fillMaxSize
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -52,7 +51,8 @@ data class CategoriesResponse(
 @Serializable
 data class Categories(
     @SerialName("name") val name: String,
-    val thumbnail_href: String? = null
+    val thumbnail_href: String? = null,
+    val description: String? = null
 )
 
 sealed class CategoriesState {
@@ -85,11 +85,11 @@ class CategoriesViewModel : ViewModel() {
             val categoriesResponse = json.decodeFromString<CategoriesResponse>(response)
             categoriesResponse.data
         } catch (e: Exception) {
+            Log.e("GetGenesAPIError", "Error fetching Categories results: ${e.message}")
             emptyList()
         }
     }
 }
-
 
 @Composable
 fun CategoriesCarousel(
@@ -108,16 +108,17 @@ fun CategoriesCarousel(
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .height(500.dp)
         ) { page ->
             val category = categories[page]
             Card(
                 shape = RoundedCornerShape(12.dp),
                 elevation = CardDefaults.cardElevation(4.dp),
                 modifier = Modifier
-                    .padding(25.dp)
+                    .padding(20.dp)
                     .fillMaxWidth()
-                    .fillMaxSize()
+                    .height(500.dp)
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -128,12 +129,18 @@ fun CategoriesCarousel(
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .height(250.dp)
+                            .height(150.dp)
                             .fillMaxWidth()
                     )
                     Text(
                         text = category.name,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier
+                            .padding(top = 16.dp)
+                    )
+                    Text(
+                        text = category.description.toString(),
+                        style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier
                             .padding(top = 16.dp)
                     )
