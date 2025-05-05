@@ -11,6 +11,8 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.absoluteOffset
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -39,6 +41,7 @@ import kotlinx.serialization.SerialName
 import androidx.lifecycle.ViewModel
 import coil.compose.AsyncImage
 import androidx.compose.runtime.rememberCoroutineScope
+
 
 @Serializable
 data class CategoriesResponse(
@@ -81,6 +84,7 @@ class CategoriesViewModel : ViewModel() {
             "https://artsy-shrey-3.wl.r.appspot.com/api/genes?artwork_id=${artworkId}"
         return try {
             val response: String = client.get(url).bodyAsText()
+            Log.d("CategoryScreen", "CategoryResponse: $response")
 
             val categoriesResponse = json.decodeFromString<CategoriesResponse>(response)
             categoriesResponse.data
@@ -112,6 +116,7 @@ fun CategoriesCarousel(
                 .height(500.dp)
         ) { page ->
             val category = categories[page]
+            val scrollState = rememberScrollState()
             Card(
                 shape = RoundedCornerShape(12.dp),
                 elevation = CardDefaults.cardElevation(4.dp),
@@ -122,7 +127,9 @@ fun CategoriesCarousel(
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .verticalScroll(scrollState)
                 ) {
                     AsyncImage(
                         model = category.thumbnail_href,
