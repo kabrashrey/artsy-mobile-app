@@ -42,6 +42,13 @@ import androidx.lifecycle.ViewModel
 import coil.compose.AsyncImage
 import androidx.compose.runtime.rememberCoroutineScope
 
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
+
 
 @Serializable
 data class CategoriesResponse(
@@ -91,6 +98,48 @@ class CategoriesViewModel : ViewModel() {
         } catch (e: Exception) {
             Log.e("GetGenesAPIError", "Error fetching Categories results: ${e.message}")
             emptyList()
+        }
+    }
+}
+
+@Composable
+fun formatLatexText(text: String): AnnotatedString {
+    return buildAnnotatedString {
+        var currentPos = 0
+        val linkRegex = Regex("\\[(.*?)]\\(.*?\\)")
+
+
+        linkRegex.findAll(text).forEach { match ->
+            append(text.substring(currentPos, match.range.first))
+            append(match.groupValues[1])
+            currentPos = match.range.last + 1
+        }
+
+        if (currentPos < text.length) {
+            val remainingText = text.substring(currentPos)
+
+            val parts = remainingText.split(Regex("([*_/])"))
+            var isBold = false
+            var isItalic = false
+            var isUnderline = false
+
+            for (part in parts) {
+                when (part) {
+                    "*" -> isBold = !isBold
+                    "_" -> isItalic = !isItalic
+                    "/" -> isUnderline = !isUnderline
+                    else -> {
+                        withStyle(
+                            SpanStyle(
+                                fontWeight = if (isBold) FontWeight.Bold else FontWeight.Normal,
+                                fontStyle = if (isItalic) FontStyle.Italic else FontStyle.Normal,
+                            )
+                        ) {
+                            append(part)
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -146,8 +195,8 @@ fun CategoriesCarousel(
                             .padding(top = 16.dp)
                     )
                     Text(
-                        text = category.description.toString(),
-                        style = MaterialTheme.typography.bodySmall,
+                        text = formatLatexText(category.description ?: ""),
+                        style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier
                             .padding(top = 16.dp)
                     )
