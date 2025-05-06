@@ -299,8 +299,13 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                                         modifier = Modifier
                                             .align(Alignment.CenterHorizontally)
                                     )
+                                    val yearDisplay = if (!artistDetails?.deathyear.isNullOrBlank()) "${artistDetails?.birthyear} - ${artistDetails?.deathyear}"
+                                                        else artistDetails?.birthyear
+                                    val nationalityLine = if(!yearDisplay.isNullOrBlank() && !artistDetails?.nationality.isNullOrBlank()) "${artistDetails?.nationality}, $yearDisplay"
+                                                        else if(artistDetails?.nationality.isNullOrBlank() && !yearDisplay.isNullOrBlank()) yearDisplay
+                                                        else artistDetails?.nationality
                                     Text(
-                                        text = "${artistDetails?.nationality}, ${artistDetails?.birthyear} - ${artistDetails?.deathyear}",
+                                        text = nationalityLine.toString(),
                                         style = MaterialTheme.typography.headlineSmall.copy(
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 15.sp
