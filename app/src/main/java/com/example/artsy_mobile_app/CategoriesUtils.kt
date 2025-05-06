@@ -178,7 +178,6 @@ fun CategoriesCarousel(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .padding(16.dp)
-                        .verticalScroll(scrollState)
                 ) {
                     AsyncImage(
                         model = category.thumbnail_href,
@@ -190,16 +189,22 @@ fun CategoriesCarousel(
                     )
                     Text(
                         text = category.name,
-                        style = MaterialTheme.typography.titleSmall,
+                        style = MaterialTheme.typography.titleMedium
+                            .copy(fontWeight = FontWeight.Bold),
                         modifier = Modifier
                             .padding(top = 16.dp)
                     )
-                    Text(
+                    Box(
+                        modifier = Modifier
+                            .verticalScroll(scrollState)
+                    ) {
+                        Text(
                         text = formatLatexText(category.description ?: ""),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier
                             .padding(top = 16.dp)
-                    )
+                        )
+                    }
                 }
             }
         }
