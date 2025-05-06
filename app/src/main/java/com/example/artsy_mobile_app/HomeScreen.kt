@@ -39,6 +39,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -63,6 +64,20 @@ import kotlinx.coroutines.launch
 fun HomeScreen(navController: NavHostController) {
 
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(navController) {
+        navController.currentBackStackEntryFlow.collect { backStackEntry ->
+            backStackEntry.savedStateHandle.get<String>("snackbar")?.let { message ->
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = message,
+                        duration = SnackbarDuration.Short)
+                    backStackEntry.savedStateHandle.remove<String>("snackbar")
+                }
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -76,7 +91,7 @@ fun HomeScreen(navController: NavHostController) {
                     MainContent(navController)
             }
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     )
 }
 
@@ -88,15 +103,10 @@ fun AppBar(
     snackbarHostState: SnackbarHostState)
 {
     var menuExpanded by remember { mutableStateOf(false) }
-
-
     val logoutViewModel: LogoutViewModel = viewModel()
     val deleteAccountViewModel: DeleteAccountViewModel = viewModel()
-
 //    val logoutState by logoutViewModel.logoutState.collectAsState()
 //    val registerState by deleteAccountViewModel.deleteState.collectAsState()
-
-    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
     TopAppBar(
@@ -135,10 +145,15 @@ fun AppBar(
                                 logoutViewModel.logout(context)
                                 navController.navigate("home") {
                                     popUpTo("home") { inclusive = true }
+                                    launchSingleTop = true
+                                }.also {
+                                    navController.currentBackStackEntry
+                                        ?.savedStateHandle
+                                        ?.set("snackbar", "Account deleted")
                                 }
-                                coroutineScope.launch {
-                                    snackbarHostState.showSnackbar("Logged out successfully!")
-                                }
+//                                coroutineScope.launch {
+//                                    snackbarHostState.showSnackbar("Logged out successfully!")
+//                                }
                             }
                         )
                         DropdownMenuItem(
@@ -152,10 +167,16 @@ fun AppBar(
                                 deleteAccountViewModel.deleteAccount(context)
                                 navController.navigate("home"){
                                     popUpTo("home") { inclusive = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }.also{
+                                    navController.currentBackStackEntry
+                                        ?.savedStateHandle
+                                        ?.set("snackbar", "Account Deleted")
                                 }
-                                coroutineScope.launch {
-                                    snackbarHostState.showSnackbar("Account deleted!")
-                                }
+//                                coroutineScope.launch {
+//                                    snackbarHostState.showSnackbar("Account deleted!")
+//                                }
                                 UserSessionManager.clearSession()
                             }
                         )
