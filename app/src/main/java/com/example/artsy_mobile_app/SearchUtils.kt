@@ -165,7 +165,7 @@ fun ArtistCard(
                     .align(Alignment.BottomStart)
                     .fillMaxWidth()
                     .background(
-                        MaterialTheme.colorScheme.primaryContainer,
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.85f),
                         shape = RoundedCornerShape(4.dp)
                     )
                     .padding(16.dp)
