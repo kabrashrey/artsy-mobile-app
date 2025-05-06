@@ -227,7 +227,6 @@ fun MainContent(navController: NavHostController) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .padding(8.dp)
             )
         }
 
@@ -237,7 +236,7 @@ fun MainContent(navController: NavHostController) {
             !isLoggedIn -> {
                 Button(
                     onClick = { navController.navigate("login") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.padding(horizontal = 110.dp)
                 ) {
                     Text("Login to see favorites")
                 }
