@@ -208,9 +208,12 @@ fun CategoriesCarousel(
         IconButton(
             onClick = {
                 scope.launch {
-                    if (pagerState.currentPage > 0) {
-                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                    val prevPage = if (pagerState.currentPage > 0){
+                        pagerState.currentPage - 1
+                    } else {
+                        categories.lastIndex
                     }
+                    pagerState.animateScrollToPage(prevPage)
                 }
             },
             modifier = Modifier
@@ -224,9 +227,10 @@ fun CategoriesCarousel(
         IconButton(
             onClick = {
                 scope.launch {
-                    if (pagerState.currentPage < categories.size - 1) {
-                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                    }
+                    val nextPage = if (pagerState.currentPage < categories.lastIndex) {
+                        pagerState.currentPage + 1
+                    } else {0}
+                    pagerState.animateScrollToPage(nextPage)
                 }
             },
             modifier = Modifier
