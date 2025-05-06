@@ -51,6 +51,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Color
 
 import androidx.navigation.NavHostController
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -219,12 +220,8 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
         }
     }
 
-    val artistName = when (val currentState = state.value) {
-        is ArtistDetailsState.Success -> currentState.artistDetails?.title ?: ""
-        else -> null
-    }
-
     val getFavoritesState = favoriteViewModel.getFavoritesState
+    val isFavoritesLoading = getFavoritesState is GetFavoriteArtistState.Loading
     val favoriteArtistIds = remember(getFavoritesState) {
         (getFavoritesState as? GetFavoriteArtistState.Success)
             ?.results
@@ -233,13 +230,31 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
             ?: emptySet()
     }
 
+    val artistDetails = (state.value as? ArtistDetailsState.Success)?.artistDetails
+    val isFavourited = remember(artistDetails, favoriteArtistIds) {
+        artistDetails?.id in favoriteArtistIds
+    }
+
     Scaffold(
         topBar = {
-            ArtistDetailsTopBar(navController = navController, artistName = artistName.toString())
+            if (artistDetails != null && !isFavoritesLoading) {
+            ArtistDetailsTopBar(
+                navController = navController,
+                artistDetails = artistDetails,
+                isLoggedIn = isLoggedIn,
+                isFavorited = isFavourited,
+                onToggleFavorite = { artist, nowFavourited ->
+                    if (nowFavourited) {
+                        favoriteViewModel.addFavorite(email, artist.id)
+                    } else {
+                        favoriteViewModel.removeFavorite(email, artist.id)
+                    }
+                }
+            )
+        }
         },
         content = { innerPadding ->
             Column(modifier = Modifier.padding(innerPadding)) {
-
                 // --- Tabs below TopBar ---
                 TabRow(selectedTabIndex = selectedTabIndex) {
                     tabs.forEachIndexed { index, tab ->
@@ -293,7 +308,7 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                                         modifier = Modifier
                                             .align(Alignment.CenterHorizontally),
                                     )
-                                    Text(text = "${artistDetails?.biography}")
+                                    Text(text = artistDetails?.biography ?: "")
                                 }
                             }
                         }
@@ -398,30 +413,54 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                         }
                     }
                 }
-            }
-        },
+            } },
     )
 }
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ArtistDetailsTopBar(navController: NavHostController, artistName: String) {
+fun ArtistDetailsTopBar(
+    navController: NavHostController,
+    artistDetails: ArtistDetails,
+    isLoggedIn: Boolean,
+    isFavorited: Boolean,
+    onToggleFavorite: (ArtistDetails, Boolean) -> Unit
+) {
     TopAppBar(
         title = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                    Text(
+                        text = artistDetails.title,
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
                 }
-                Text(
-                    text = artistName,
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(start = 8.dp)
-                )
+
+                if (isLoggedIn) {
+                    IconButton(
+                        onClick = {
+                            onToggleFavorite(artistDetails, !isFavorited)
+                    }) {
+                        Icon(
+                            painter = painterResource(
+                                id = if (isFavorited) R.drawable.star_filled else R.drawable.star_outline
+                            ),
+                            contentDescription = if (isFavorited) "Unfavorite" else "Favorite",
+                            tint = if (isFavorited) Color.Black else MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(

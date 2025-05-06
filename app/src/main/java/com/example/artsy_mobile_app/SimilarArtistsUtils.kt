@@ -97,8 +97,6 @@ fun SimilarArtistCard(
     isFavorited: Boolean,
     onToggleFavorite: (SimilarArtists, Boolean) -> Unit
 ) {
-    var isFav by remember { mutableStateOf(isFavorited) }
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -130,17 +128,16 @@ fun SimilarArtistCard(
                             shape = CircleShape
                         )
                         .clickable {
-                            isFav = !isFav
-                            onToggleFavorite(similarArtists, isFav)
+                            onToggleFavorite(similarArtists, !isFavorited)
                         },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         painter = painterResource(
-                            id = if (isFav) R.drawable.star_filled else R.drawable.star_outline
+                            id = if (isFavorited) R.drawable.star_filled else R.drawable.star_outline
                         ),
-                        contentDescription = if (isFav) "Remove from favorites" else "Add to favorites",
-                        tint = if (isFav) Color.Black else MaterialTheme.colorScheme.onPrimaryContainer,
+                        contentDescription = if (isFavorited) "Remove from favorites" else "Add to favorites",
+                        tint = if (isFavorited) Color.Black else MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.size(22.dp)
                     )
                 }
