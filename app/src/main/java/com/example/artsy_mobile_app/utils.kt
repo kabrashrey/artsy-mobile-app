@@ -27,9 +27,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.serialization.json.Json
 
-import android.util.Log
-
-
 @Composable
 fun getCurrentDate(): String {
     val dateFormat = SimpleDateFormat("dd MMMM, yyyy", Locale.getDefault())
@@ -59,33 +56,6 @@ fun LoadingIndicator() {
         }
     }
 }
-
-
-//
-//object KtorClientProvider {
-//    private var client: HttpClient? = null
-//
-//    fun getClient(context: Context): HttpClient {
-//        if (client == null) {
-//            val cookieJar = PersistentCookieJar(context)
-//
-//            val okHttpClient = OkHttpClient.Builder()
-//                .cookieJar(cookieJar)
-//                .connectTimeout(30, TimeUnit.SECONDS)
-//                .build()
-//
-//            client = HttpClient(OkHttp) {
-//                engine {
-//                    preconfigured = okHttpClient
-//                }
-//                install(ContentNegotiation) {
-//                    json(Json { ignoreUnknownKeys = true })
-//                }
-//            }
-//        }
-//        return client!!
-//    }
-//}
 
 object SnackbarManager {
     private val _messages = MutableSharedFlow<String>()

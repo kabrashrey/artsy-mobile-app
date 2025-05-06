@@ -1,6 +1,5 @@
 package com.example.artsy_mobile_app
 
-import android.util.Log
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -87,27 +86,27 @@ fun SearchScreen(navController: NavHostController) {
             when (searchState) {
                 is SearchState.Loading -> {}
                 is SearchState.Error -> {
-                    Surface(
-                        shape = RoundedCornerShape(50),
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .wrapContentSize()
-                            .fillMaxWidth()
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
-                            contentAlignment = Alignment.Center
-                        ){
-                            Text(
-                                text = "No Favorites",
-                                color = MaterialTheme.colorScheme.onErrorContainer,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                    }
+//                    Surface(
+//                        shape = RoundedCornerShape(50),
+//                        color = MaterialTheme.colorScheme.primaryContainer,
+//                        modifier = Modifier
+//                            .padding(8.dp)
+//                            .wrapContentSize()
+//                            .fillMaxWidth()
+//                    ) {
+//                        Box(
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .padding(horizontal = 16.dp, vertical = 12.dp),
+//                            contentAlignment = Alignment.Center
+//                        ){
+//                            Text(
+//                                text = "No Favorites",
+//                                color = MaterialTheme.colorScheme.onErrorContainer,
+//                                style = MaterialTheme.typography.bodyMedium
+//                            )
+//                        }
+//                    }
                 }
 
                 is SearchState.Success -> {

@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.selection.SelectionContainer
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -31,6 +33,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.style.TextDecoration
 
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
@@ -103,46 +108,127 @@ class CategoriesViewModel : ViewModel() {
 }
 
 @Composable
-fun formatLatexText(text: String): AnnotatedString {
-    return buildAnnotatedString {
-        var currentPos = 0
-        val linkRegex = Regex("\\[(.*?)]\\(.*?\\)")
+fun LatexText(text: String, modifier: Modifier = Modifier) {
+    val textColor = MaterialTheme.colorScheme.onBackground
+    val annotatedText = buildAnnotatedString {
+        val linkRegex = Regex("\\[(.*?)]\\((.*?)\\)")
+        var currentIndex = 0
 
+        for (match in linkRegex.findAll(text)) {
+            appendStyledMarkdown(text.substring(currentIndex, match.range.first), textColor)
 
-        linkRegex.findAll(text).forEach { match ->
-            append(text.substring(currentPos, match.range.first))
-            append(match.groupValues[1])
-            currentPos = match.range.last + 1
+            val linkText = match.groupValues[1]
+            val linkUrl = "https://www.artsy.net${match.groupValues[2]}"
+            val start = length
+            append(linkText)
+            addStyle(
+                style = SpanStyle(
+                    color = textColor,
+                ),
+                start = start,
+                end = start + linkText.length
+            )
+            addStringAnnotation(
+                tag = "URL",
+                annotation = linkUrl,
+                start = start,
+                end = start + linkText.length
+            )
+            currentIndex = match.range.last + 1
         }
 
-        if (currentPos < text.length) {
-            val remainingText = text.substring(currentPos)
+        if (currentIndex < text.length) {
+            appendStyledMarkdown(text.substring(currentIndex), textColor)
+        }
+    }
+    val uriHandler = LocalUriHandler.current
 
-            val parts = remainingText.split(Regex("([*_/])"))
-            var isBold = false
-            var isItalic = false
-            var isUnderline = false
-
-            for (part in parts) {
-                when (part) {
-                    "*" -> isBold = !isBold
-                    "_" -> isItalic = !isItalic
-                    "/" -> isUnderline = !isUnderline
-                    else -> {
-                        withStyle(
-                            SpanStyle(
-                                fontWeight = if (isBold) FontWeight.Bold else FontWeight.Normal,
-                                fontStyle = if (isItalic) FontStyle.Italic else FontStyle.Normal,
-                            )
-                        ) {
-                            append(part)
-                        }
+    SelectionContainer {
+        ClickableText(
+            text = annotatedText,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = modifier,
+            onClick = { offset ->
+                annotatedText.getStringAnnotations(
+                    tag = "URL",
+                    start = offset,
+                    end = offset
+                )
+                    .firstOrNull()?.let { annotation ->
+                        uriHandler.openUri(annotation.item)
                     }
+            }
+        )
+    }
+}
+
+fun AnnotatedString.Builder.appendStyledMarkdown(input: String, textColor: Color) {
+    var bold = false
+    var italic = false
+    var underline = false
+
+    val tokens = Regex("([*_\\/])|([^*_\\/]+)").findAll(input)
+    for (token in tokens) {
+        when (val str = token.value) {
+            "*" -> bold = !bold
+            "_" -> italic = !italic
+            "/" -> underline = !underline
+            else -> {
+                withStyle(
+                    style = SpanStyle(
+                        color = textColor,
+                        fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal,
+                        fontStyle = if (italic) FontStyle.Italic else FontStyle.Normal,
+                        textDecoration = if (underline) TextDecoration.Underline else TextDecoration.None
+                    )
+                ) {
+                    append(str)
                 }
             }
         }
     }
 }
+
+//@Composable
+//fun formatLatexText(text: String): AnnotatedString {
+//    return buildAnnotatedString {
+//        var currentPos = 0
+//        val linkRegex = Regex("\\[(.*?)]\\(.*?\\)")
+//
+//        linkRegex.findAll(text).forEach { match ->
+//            append(text.substring(currentPos, match.range.first))
+//            append(match.groupValues[1])
+//            currentPos = match.range.last + 1
+//        }
+//
+//        if (currentPos < text.length) {
+//            val remainingText = text.substring(currentPos)
+//
+//            val parts = remainingText.split(Regex("([*_/])"))
+//            var isBold = false
+//            var isItalic = false
+//            var isUnderline = false
+//
+//            for (part in parts) {
+//                when (part) {
+//                    "*" -> isBold = !isBold
+//                    "_" -> isItalic = !isItalic
+//                    "/" -> isUnderline = !isUnderline
+//                    else -> {
+//                        withStyle(
+//                            SpanStyle(
+//                                fontWeight = if (isBold) FontWeight.Bold else FontWeight.Normal,
+//                                fontStyle = if (isItalic) FontStyle.Italic else FontStyle.Normal,
+//                            )
+//                        ) {
+//                            append(part)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
 
 @Composable
 fun CategoriesCarousel(
@@ -198,11 +284,9 @@ fun CategoriesCarousel(
                         modifier = Modifier
                             .verticalScroll(scrollState)
                     ) {
-                        Text(
-                        text = formatLatexText(category.description ?: ""),
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier
-                            .padding(top = 16.dp)
+                        LatexText(
+                            text = category.description ?: "",
+                            modifier = Modifier.padding(top = 16.dp)
                         )
                     }
                 }

@@ -221,7 +221,7 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
     }
 
     val getFavoritesState = favoriteViewModel.getFavoritesState
-    val isFavoritesLoading = getFavoritesState is GetFavoriteArtistState.Loading
+//    val isFavoritesLoading = getFavoritesState is GetFavoriteArtistState.Loading
     val favoriteArtistIds = remember(getFavoritesState) {
         (getFavoritesState as? GetFavoriteArtistState.Success)
             ?.results
@@ -237,7 +237,7 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
 
     Scaffold(
         topBar = {
-            if (artistDetails != null && !isFavoritesLoading) {
+            if (artistDetails != null) {
             ArtistDetailsTopBar(
                 navController = navController,
                 artistDetails = artistDetails,

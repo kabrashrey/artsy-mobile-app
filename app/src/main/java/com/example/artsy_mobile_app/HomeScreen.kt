@@ -58,8 +58,6 @@ import coil.compose.rememberAsyncImagePainter
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
-import android.util.Log
-
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
