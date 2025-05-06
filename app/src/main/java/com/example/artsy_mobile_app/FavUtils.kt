@@ -100,7 +100,7 @@ class FavoriteArtistViewModel : ViewModel() {
         viewModelScope.launch {
             addToFavorites(email, favId)
             if (addFavoriteArtistState is AddFavoriteArtistState.Success) {
-                SnackbarManager.showMessage("Added to favorites!")
+                SnackbarManager.showMessage("Added to favorites")
             }
             fetchFavorites(email)
         }
@@ -110,7 +110,7 @@ class FavoriteArtistViewModel : ViewModel() {
         viewModelScope.launch {
             removeFromFavorites(email, favId)
             if (removeFavoriteArtistState is RemoveFavoriteArtistState.Success) {
-                SnackbarManager.showMessage("Removed from favorites!")
+                SnackbarManager.showMessage("Removed from favorites")
             }
             fetchFavorites(email)
         }

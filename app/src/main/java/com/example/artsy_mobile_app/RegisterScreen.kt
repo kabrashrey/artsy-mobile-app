@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.focus.onFocusChanged
 
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavHostController
@@ -56,6 +57,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+
+
 
 
 @Composable
@@ -135,10 +138,16 @@ fun RegisterMainContent(
             value = fullName,
             onValueChange = {
                 fullName = it
-                fullNameError = null
+                fullNameError = if (it.isBlank()) "Full name cannot be empty" else null
             },
             label = { Text("Enter full name") },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged{ focusState ->
+                    if(focusState.isFocused && fullName.isBlank()){
+                        fullNameError = "Full name cannot be empty"
+                    }
+                },
             isError = fullNameError != null
         )
         if (fullNameError != null){
@@ -152,10 +161,16 @@ fun RegisterMainContent(
             value = email,
             onValueChange = {
                 email = it
-                emailError = null
+                emailError = if (it.isBlank()) "Email cannot be empty" else null
             },
             label = { Text("Enter Email") },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged{ focusState ->
+                    if(focusState.isFocused && email.isBlank()){
+                        emailError = "Email cannot be empty"
+                    }
+                },
             isError = emailError != null
         )
         if (emailError != null){
@@ -169,11 +184,17 @@ fun RegisterMainContent(
             value = password,
             onValueChange = {
                 password = it
-                passwordError = null
+                passwordError = if (it.isBlank()) "Password cannot be empty" else null
             },
             label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged{ focusState ->
+                    if(focusState.isFocused && password.isBlank()){
+                        passwordError = "Password cannot be empty"
+                    }
+                },
             isError = passwordError != null
         )
         if (passwordError != null){
@@ -220,6 +241,7 @@ fun RegisterMainContent(
 
         val state = registerState
         when(state) {
+            is RegisterState.Loading -> LoadingIndicator()
             is RegisterState.Error -> {
                 val errorMessage = state.error
                 if (errorMessage.contains("409")) {
@@ -255,7 +277,7 @@ fun RegisterMainContent(
                 modifier = Modifier.alignByBaseline()
             )
             TextButton(
-                onClick = { navController.popBackStack() },
+                onClick = { navController.navigate("login") },
                 contentPadding = PaddingValues(4.dp),
                 modifier = Modifier.alignByBaseline()
             ) {
