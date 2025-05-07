@@ -64,6 +64,8 @@ data class TabItem(val title: String, val icon: Any)
 
 @Composable
 fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
+
+    //viewModels
     val viewModel: ArtistDetailsViewModel = viewModel()
     val artworksViewModel: ArtworksViewModel = viewModel()
     val similarArtistsViewModel: SimilarArtistsViewModel = viewModel()
@@ -71,30 +73,44 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
     val categoriesViewModel: CategoriesViewModel = viewModel()
 
     val state =  viewModel.state
+    val categoryState = categoriesViewModel.categoriesState
+    val getFavoritesState = favoriteViewModel.getFavoritesState
 
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     var showCarousel by remember { mutableStateOf(false) }
     var selectedArtworkId by remember { mutableStateOf<String?>(null) }
-    val categoryState = categoriesViewModel.categoriesState
 
     val isLoggedIn = UserSessionManager.isLoggedIn()
     val email = UserSessionManager.getUser()?.email ?: ""
+    val artistDetails = (state.value as? ArtistDetailsState.Success)?.artistDetails
 
+    // TABS
     val tabs = mutableListOf(
         TabItem("Details", Icons.Outlined.Info),
         TabItem("Artworks", Icons.Outlined.AccountBox)
     )
-
     if (isLoggedIn) {
         tabs.add(TabItem("Similar", painterResource(id = R.drawable.person_search)))
     }
 
     LaunchedEffect(artistId) {
         selectedTabIndex = 0
+        favoriteViewModel.fetchFavorites(email)
         viewModel.fetchArtistDetails(artistId)
         artworksViewModel.fetchArtworks(artistId)
         similarArtistsViewModel.fetchSimilarArtists(artistId)
-        favoriteViewModel.fetchFavorites(email)
+    }
+
+    // FAVS
+    val favoriteArtistIds = remember(getFavoritesState) {
+        (getFavoritesState as? GetFavoriteArtistState.Success)
+            ?.results
+            ?.map { it.favId }
+            ?.toSet()
+            ?: emptySet()
+    }
+    val isFavourited = remember(artistDetails, favoriteArtistIds) {
+        artistDetails?.id in favoriteArtistIds
     }
 
     LaunchedEffect(selectedArtworkId) {
@@ -218,21 +234,6 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                 }
             }
         }
-    }
-
-    val getFavoritesState = favoriteViewModel.getFavoritesState
-//    val isFavoritesLoading = getFavoritesState is GetFavoriteArtistState.Loading
-    val favoriteArtistIds = remember(getFavoritesState) {
-        (getFavoritesState as? GetFavoriteArtistState.Success)
-            ?.results
-            ?.map { it.favId }
-            ?.toSet()
-            ?: emptySet()
-    }
-
-    val artistDetails = (state.value as? ArtistDetailsState.Success)?.artistDetails
-    val isFavourited = remember(artistDetails, favoriteArtistIds) {
-        artistDetails?.id in favoriteArtistIds
     }
 
     Scaffold(
