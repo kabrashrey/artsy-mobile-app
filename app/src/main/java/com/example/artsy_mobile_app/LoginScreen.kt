@@ -6,6 +6,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.focus.onFocusChanged
 
 
 import androidx.compose.foundation.layout.*
@@ -130,10 +131,17 @@ fun LoginMainContent(
             value = email,
             onValueChange = {
                 email = it
+                emailError = if (it.isBlank()) "Email cannot be empty" else null
                 clearFieldErrors()
             },
             label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { focusState ->
+                    if (focusState.isFocused && email.isBlank()) {
+                        emailError =  "Email cannot be empty"
+                    }
+                },
             isError = emailError != null
         )
         if (emailError != null){
@@ -150,11 +158,18 @@ fun LoginMainContent(
             value = password,
             onValueChange = {
                 password = it
+                passwordError = if (it.isBlank()) "Password cannot be empty" else null
                 clearFieldErrors()
             },
             label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { focusState ->
+                    if (focusState.isFocused && password.isBlank()) {
+                        passwordError = "Password cannot be empty"
+                    }
+                },
             isError = passwordError != null
         )
         if (passwordError != null){

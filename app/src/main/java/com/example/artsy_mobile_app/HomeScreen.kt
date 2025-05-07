@@ -149,7 +149,7 @@ fun AppBar(
                                 }.also {
                                     navController.currentBackStackEntry
                                         ?.savedStateHandle
-                                        ?.set("snackbar", "Account deleted")
+                                        ?.set("snackbar", "Logged out successfully")
                                 }
 //                                coroutineScope.launch {
 //                                    snackbarHostState.showSnackbar("Logged out successfully!")
@@ -172,7 +172,7 @@ fun AppBar(
                                 }.also{
                                     navController.currentBackStackEntry
                                         ?.savedStateHandle
-                                        ?.set("snackbar", "Account Deleted")
+                                        ?.set("snackbar", "Deleted user successfully")
                                 }
 //                                coroutineScope.launch {
 //                                    snackbarHostState.showSnackbar("Account deleted!")
