@@ -22,6 +22,9 @@ import androidx.compose.ui.tooling.preview.Preview
 
 import com.example.artsy_mobile_app.ui.theme.ArtsyMobileAppTheme
 
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,11 +68,31 @@ class MainActivity : ComponentActivity() {
                                 snackbarHostState = snackbarHostState,
                                 scope = scope)
                         }
-                        composable("artistDetails/{artistId}") { backStackEntry ->
-                            val artistId = backStackEntry.arguments?.getString("artistId")
-                            if (artistId != null) {
-                                ArtistDetailsScreen(artistId = artistId, navController)
-                            }
+//                        composable("artistDetails/{artistId}") { backStackEntry ->
+//                            val artistId = backStackEntry.arguments?.getString("artistId")
+//                            if (artistId != null) {
+//                                ArtistDetailsScreen(artistId = artistId, navController)
+//                            }
+//                        }
+                        composable(
+                            route = "artistDetails/{artistId}?parentId={parentId}",
+                            arguments = listOf(
+                                navArgument("artistId") { type = NavType.StringType },
+                                navArgument("parentId") {
+                                    type = NavType.StringType
+                                    defaultValue = ""
+                                    nullable = true
+                                }
+                            )
+                        ) { backStackEntry ->
+                            val artistId = backStackEntry.arguments?.getString("artistId") ?: ""
+                            val parentId = backStackEntry.arguments?.getString("parentId")
+
+                            ArtistDetailsScreen(
+                                artistId = artistId,
+                                navController = navController,
+                                parentId = parentId
+                            )
                         }
                     }
                 }

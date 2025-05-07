@@ -58,7 +58,11 @@ import androidx.compose.ui.graphics.Color
 data class TabItem(val title: String, val icon: Any)
 
 @Composable
-fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
+fun ArtistDetailsScreen(
+    artistId: String,
+    navController: NavHostController,
+    parentId: String?
+){
 
     //viewModels
     val viewModel: ArtistDetailsViewModel = viewModel()
@@ -71,7 +75,12 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
     val categoryState = categoriesViewModel.categoriesState
     val getFavoritesState = favoriteViewModel.getFavoritesState
 
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
+    var selectedTabIndex by remember {
+        mutableIntStateOf(
+            navController.currentBackStackEntry
+                ?.savedStateHandle
+                ?.get<Int>("returnTabIndex") ?: 0
+        )}
     var showCarousel by remember { mutableStateOf(false) }
     var selectedArtworkId by remember { mutableStateOf<String?>(null) }
 
@@ -89,14 +98,17 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
     }
 
     LaunchedEffect(artistId) {
-        selectedTabIndex = 0
+        selectedTabIndex = navController
+            .currentBackStackEntry
+            ?.savedStateHandle
+            ?.get<Int>("returnTabIndex") ?: 0
         favoriteViewModel.fetchFavorites(email)
         viewModel.fetchArtistDetails(artistId)
         artworksViewModel.fetchArtworks(artistId)
         similarArtistsViewModel.fetchSimilarArtists(artistId)
     }
 
-    // FAVS
+    // FAVORITE
     val favoriteArtistIds = remember(getFavoritesState) {
         (getFavoritesState as? GetFavoriteArtistState.Success)
             ?.results
@@ -238,6 +250,7 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                 navController = navController,
                 artistDetails = artistDetails,
                 isLoggedIn = isLoggedIn,
+                parentId = parentId,
                 isFavorited = isFavourited,
                 onToggleFavorite = { artist, nowFavourited ->
                     if (nowFavourited) {
@@ -393,6 +406,7 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
                                             similarArtists = artist,
                                             onClick = { selectedArtist ->
                                                 navController.navigate("artistDetails/${selectedArtist.id}") {
+                                                    navController.currentBackStackEntry?.savedStateHandle?.set("returnTabIndex", 2)
                                                     popUpTo("artistDetails/{artistId}") {
                                                         inclusive = true
                                                     }
@@ -424,6 +438,7 @@ fun ArtistDetailsScreen( artistId: String, navController: NavHostController){
 fun ArtistDetailsTopBar(
     navController: NavHostController,
     artistDetails: ArtistDetails,
+    parentId: String?,
     isLoggedIn: Boolean,
     isFavorited: Boolean,
     onToggleFavorite: (ArtistDetails, Boolean) -> Unit
@@ -438,7 +453,16 @@ fun ArtistDetailsTopBar(
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = {
+                        if (!parentId.isNullOrEmpty()) {
+                            navController.navigate("artistDetails/$parentId") {
+                                popUpTo("artistDetails/{artistId}") { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        } else {
+                        navController.popBackStack()
+                        }
+                    }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                     Text(
