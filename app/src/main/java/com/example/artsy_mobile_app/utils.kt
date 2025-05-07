@@ -77,7 +77,6 @@ object HttpClientProvider {
 fun parseTimestamp(timestamp: String): Long {
     return try {
         val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-//        format.timeZone = TimeZone.getTimeZone("UTC")
         format.timeZone = TimeZone.getDefault()
         format.parse(timestamp)?.time ?: System.currentTimeMillis()
     } catch (e: Exception) {

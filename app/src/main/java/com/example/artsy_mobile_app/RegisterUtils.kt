@@ -1,10 +1,10 @@
 package com.example.artsy_mobile_app
-
 import PersistentCookieJar
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.util.Log
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
@@ -25,9 +25,6 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.Serializable
 
-import android.util.Log
-
-
 
 sealed class RegisterState {
     object Idle : RegisterState()
@@ -35,7 +32,6 @@ sealed class RegisterState {
     data class Success(val message: String) : RegisterState()
     data class Error(val error: String) : RegisterState()
 }
-
 
 @Serializable
 data class RegisterRequest(
@@ -52,7 +48,6 @@ data class UserData(
     val avatar: String,
     val _id: String
 )
-
 
 object RegisterRepository {
     suspend fun registerUser(context: Context, name: String, email: String, password: String): Result<Unit> {
@@ -188,4 +183,3 @@ class DeleteAccountViewModel : ViewModel() {
         }
     }
 }
-

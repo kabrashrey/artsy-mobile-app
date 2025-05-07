@@ -1,6 +1,8 @@
 package com.example.artsy_mobile_app
 
 import androidx.compose.runtime.*
+import androidx.navigation.NavHostController
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -53,14 +55,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.Color
 
-import androidx.navigation.NavHostController
-import androidx.lifecycle.viewmodel.compose.viewModel
-
-import android.util.Log
-
-
 data class TabItem(val title: String, val icon: Any)
-
 
 @Composable
 fun ArtistDetailsScreen( artistId: String, navController: NavHostController){

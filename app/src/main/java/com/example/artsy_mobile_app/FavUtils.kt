@@ -86,7 +86,6 @@ sealed class RemoveFavoriteArtistState {
     data class Error(val message: String) : RemoveFavoriteArtistState()
 }
 
-
 class FavoriteArtistViewModel : ViewModel() {
 
     var addFavoriteArtistState: AddFavoriteArtistState by mutableStateOf(AddFavoriteArtistState.Loading)
@@ -252,4 +251,3 @@ fun FavoriteArtistItem(artist: FavoriteArtist, onClick: () -> Unit) {
         )
     }
 }
-

@@ -7,7 +7,6 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 
-
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.HttpHeaders
@@ -25,7 +24,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.Serializable
-
 
 import android.util.Log
 
@@ -104,7 +102,6 @@ object LoginRepository {
 
             UserSessionManager.init(context)
             UserSessionManager.saveSession(user, accessToken)
-//            client.close()
         }
     }
 }
@@ -178,7 +175,6 @@ object LogoutRepository{
             val cookieJar = PersistentCookieJar(context)
             cookieJar.clearCookies()
             UserSessionManager.clearSession()
-//            client.close()
         }
     }
 }

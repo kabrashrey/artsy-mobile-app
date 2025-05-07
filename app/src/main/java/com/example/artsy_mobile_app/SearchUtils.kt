@@ -103,7 +103,6 @@ class SearchViewModel : ViewModel() {
 }
 
 
-
 @Composable
 fun ArtistCard(
     artist: Artist,

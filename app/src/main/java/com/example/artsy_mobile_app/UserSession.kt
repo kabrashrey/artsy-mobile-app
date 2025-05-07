@@ -9,7 +9,6 @@ object UserSessionManager {
     private const val PREFS_NAME = "user_session"
     private const val KEY_USER = "user"
     private const val KEY_ACCESS_TOKEN = "access_token"
-
     private lateinit var preferences: SharedPreferences
     private val json = Json { ignoreUnknownKeys = true }
 
