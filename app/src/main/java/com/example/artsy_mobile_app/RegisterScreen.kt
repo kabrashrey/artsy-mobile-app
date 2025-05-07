@@ -1,5 +1,6 @@
 package com.example.artsy_mobile_app
 
+import androidx.compose.foundation.clickable
 import androidx.navigation.NavHostController
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.CoroutineScope
@@ -33,7 +34,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.TextButton
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -44,7 +44,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.Composable
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -264,16 +263,15 @@ fun RegisterMainContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(text = "Already have an account?",
-                modifier = Modifier.alignByBaseline()
+                modifier = Modifier.align(Alignment.CenterVertically)
             )
-            TextButton(
-                onClick = { navController.navigate("login") },
-                contentPadding = PaddingValues(4.dp),
-                modifier = Modifier.alignByBaseline()
-            ) {
-                Text(text = "Login",
-                )
-            }
+            Text(
+                text = " Login",
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable {
+                    navController.navigate("login")
+                }
+            )
         }
     }
 }

@@ -29,7 +29,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.TextButton
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
@@ -46,6 +45,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 import android.util.Log
+import androidx.compose.foundation.clickable
 
 
 @Composable
@@ -243,14 +243,13 @@ fun LoginMainContent(
             Text(text = "Don't have an account yet?",
                 modifier = Modifier.alignByBaseline()
             )
-            TextButton(
-                onClick = { navController.navigate("register") },
-                contentPadding = PaddingValues(4.dp),
-                modifier = Modifier.alignByBaseline()
-            ) {
-                Text(text = "Register",
-                )
-            }
+            Text(
+                text = " Register",
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable {
+                    navController.navigate("register")
+                }
+            )
         }
     }
     }
