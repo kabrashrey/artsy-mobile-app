@@ -37,6 +37,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil.compose.AsyncImage
 import androidx.compose.runtime.*
+import androidx.compose.ui.text.font.FontWeight
 
 
 @Serializable
@@ -169,7 +170,7 @@ fun ArtistCard(
             ) {
                 Text(
                     text = artist.title,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
