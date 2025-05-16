@@ -38,4 +38,4 @@ This project is licensed under the MIT License.
 
 
 📹 App Demo Video:
-https://drive.google.com/file/d/1MgiOZtQuFyVCQ4MrReNXGcD_NWJ4bbf0/view?usp=share_link
+https://drive.google.com/file/d/1LkrYtIFDRZyQoYiZP2x5OWPKbOQObdij/view?usp=sharing
